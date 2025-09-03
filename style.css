@@ -1,0 +1,47 @@
+body {
+  font-family: 'Pretendard', sans-serif;
+  text-align: center;
+  background: #1f2937;
+  color: #fff;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background 0.2s;
+}
+
+button:hover {
+  background: #1d4ed8;
+  transform: scale(1.05);
+}
+
+.start {
+  background: #ef4444;
+}
+
+.start:hover {
+  background: #dc2626;
+}
+
+.big-screen {
+  background: #0f172a;
+}
+
+#result {
+  font-size: 2rem;
+  margin-top: 20px;
+  font-weight: bold;
+}
