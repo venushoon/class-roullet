@@ -83,6 +83,8 @@
   .icon-btn:hover{filter:brightness(1.05)}
   .toolbar{display:flex;gap:8px;justify-content:flex-end;margin:-2px 0 8px}
 
+  .help{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px dashed var(--panel-line);color:var(--muted);font-size:13px;line-height:1.6}
+
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
   .modal.show{display:flex}
   .backdrop{position:absolute;inset:0;background:rgba(5,8,25,.6);backdrop-filter:blur(3px)}
@@ -123,9 +125,9 @@
     <!-- RIGHT -->
     <aside class="panel right">
       <div class="section">
-        <h2>입력</h2>
+        <h2>입력 · 불러오기</h2>
         <div class="input-row">
-          <textarea id="quizInput" class="ta" placeholder="항목을 적고 Enter(추가) / Shift+Enter(줄바꿈)&#10;정답도 넣으려면: 항목 || 정답"></textarea>
+          <textarea id="quizInput" class="ta" placeholder="한 줄 입력 후 Enter(추가) · Shift+Enter(줄바꿈)"></textarea>
           <button class="btn btn-primary" id="btnAdd">+ 추가</button>
         </div>
 
@@ -134,6 +136,14 @@
           <button class="btn" id="btnLoadFile">📁 파일 불러오기</button>
           <button class="btn" id="btnDownloadSamples">⬇ 샘플 내려받기</button>
           <input id="fileInput" type="file" accept=".txt,.csv" class="hidden" />
+        </div>
+
+        <!-- 입력 방법 -->
+        <div class="help">
+          <b>입력방법</b><br>
+          • 한 줄 = 한 항목<br>
+          • 정답/부가정보가 있으면 <b>항목 // 정답</b> 형태로 입력 (예: <i>호주의 수도는? // 캔버라</i>)<br>
+          • CSV는 <code>label,answer,weight</code> 형식, TXT는 줄마다 항목 또는 <code>항목 // 정답</code>
         </div>
 
         <!-- 편집 테이블 -->
@@ -149,25 +159,25 @@
             <tbody id="itemTable"></tbody>
           </table>
         </div>
+      </div>
 
-        <div class="section" style="margin-top:12px">
-          <h2>기록</h2>
-          <div style="display:flex;gap:10px;margin-bottom:8px">
-            <button class="btn" id="btnToggleLog">📝 보기/숨기기</button>
-            <button class="btn" id="btnClearLog">🗑 삭제</button>
-          </div>
-          <div id="logBox" class="hidden" style="max-height:180px;overflow:auto;font-size:13px;opacity:.9"></div>
+      <div class="section" style="margin-top:12px">
+        <h2>기록</h2>
+        <div style="display:flex;gap:10px;margin-bottom:8px">
+          <button class="btn" id="btnToggleLog">📝 보기/숨기기</button>
+          <button class="btn" id="btnClearLog">🗑 삭제</button>
         </div>
+        <div id="logBox" class="hidden" style="max-height:180px;overflow:auto;font-size:13px;opacity:.9"></div>
+      </div>
 
-        <div class="section" style="margin-top:12px">
-          <h2>옵션</h2>
-          <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
-            <input id="chkDupe" type="checkbox" checked /> 중복 허용(당첨 후 삭제 안 함)
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
-            <input id="chkTheme" type="checkbox" /> 밝은(프로젝터) 모드
-          </label>
-        </div>
+      <div class="section" style="margin-top:12px">
+        <h2>옵션</h2>
+        <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          <input id="chkDupe" type="checkbox" checked /> 중복 허용(당첨 후 삭제 안 함)
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          <input id="chkTheme" type="checkbox" /> 밝은(프로젝터) 모드
+        </label>
       </div>
     </aside>
   </div>
@@ -193,8 +203,7 @@ const qs=id=>document.getElementById(id);
 const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmtTime=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
 const show=el=>el.classList.remove('hidden'); const hide=el=>el.classList.add('hidden'); const toggle=el=>el.classList.toggle('hidden');
-// ★ 폰트 px 추출 (패치)
-const getFontPx = (ctx) => { const m = ctx.font.match(/(\\d+(?:\\.\\d+)?)px/); return m ? Number(m[1]) : 16; };
+const getFontPx = (ctx) => { const m = ctx.font.match(/(\d+(?:\.\d+)?)px/); return m ? Number(m[1]) : 16; };
 
 /* ===== State ===== */
 let items=[]; // {label, answer, weight:null|number}
@@ -217,12 +226,17 @@ ta.addEventListener('input', ()=>autosize(ta)); autosize(ta);
 let composing=false;
 ta.addEventListener('compositionstart',()=>{composing=true;});
 ta.addEventListener('compositionend',()=>{composing=false;});
+function splitLabelAnswer(v){
+  // 우선순위: // → || (둘 다 인식)
+  if(v.includes('//')){ const [q,a]=v.split('//'); return [q.trim(), (a||'').trim()]; }
+  if(v.includes('||')){ const [q,a]=v.split('||'); return [q.trim(), (a||'').trim()]; }
+  return [v.trim(), ""];
+}
 function addFromTextarea(){
   if(composing) return;
-  let v=(ta.value||'').replace(/\\r/g,'').trim();
+  let v=(ta.value||'').replace(/\r/g,'').trim();
   if(!v) return;
-  let q=v, a="";
-  if(v.includes("||")){ const [qq,aa]=v.split("||"); q=qq.trim(); a=(aa||"").trim(); }
+  const [q,a]=splitLabelAnswer(v);
   items.push({label:q, answer:a, weight:null});
   ta.value=''; autosize(ta); showEditor(); rebuildSegments();
 }
@@ -315,7 +329,6 @@ function drawWheel(){
 
       const textColor = bestTextColorForHSL(hue,75,52);
 
-      // ★ 줄 높이 계산 패치
       const fs = getFontPx(ctx);
       const lineH = fs + 6;
 
@@ -353,7 +366,7 @@ function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arc
 /* text fitting with auto font downsize + ellipsis */
 function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){
   let size=basePx;
-  const words = (text||'').split(/\\s+/);
+  const words = (text||'').split(/\s+/);
   while(size>=minPx){
     ctx.font = `700 ${size}px ui-sans-serif,system-ui,'Noto Sans KR'`;
     const lines=[]; let line='', w=0;
@@ -512,13 +525,13 @@ fileInput.addEventListener('change', async (e)=>{
   fileInput.value='';
 });
 function parseTXT(s){
-  return s.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean).map(v=>{
-    if(v.includes('||')){ const [q,a]=v.split('||'); return {label:q.trim(), answer:(a||'').trim(), weight:null}; }
-    return {label:v, answer:'', weight:null};
+  return s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean).map(v=>{
+    const [q,a]=splitLabelAnswer(v);
+    return {label:q, answer:a, weight:null};
   });
 }
 function parseCSV(s){
-  const lines=s.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean), out=[];
+  const lines=s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean), out=[];
   if(lines.length){
     const h=lines[0].split(',').map(x=>x.trim().toLowerCase());
     if(h.includes('question')||h.includes('문항')||h.includes('label')||h.includes('항목')) lines.shift();
@@ -527,14 +540,14 @@ function parseCSV(s){
     const [a,b,c]=(line.split(',')||[]).map(x=>x?.trim());
     const q=a||''; const an=b||''; const w=(c==null||c==='')? null : Number(c);
     if(!q) continue;
-    out.push({label:q, answer:an, weight:isNaN(w)? null : w});
+    out.push({label:q, answer:an, weight=isNaN(w)? null : w});
   }
   return out;
 }
 qs('btnDownloadSamples').addEventListener('click', ()=>{
   const txt=`가위바위보 대표 뽑기
-청소구역 정하기 || 복도
-오늘의 발표자 || 1조`;
+청소구역 정하기 // 복도
+오늘의 발표자 // 1조`;
   const csv=`label,answer,weight
 간식 당번,,
 자리 바꾸기(앞줄),,40
@@ -551,7 +564,7 @@ qs('btnBig').addEventListener('click', ()=>{
   w.document.write(bigHtml(document.documentElement.getAttribute('data-theme')||'dark', items, allowDuplicate, angle)); w.document.close();
 });
 
-/* ===== Big screen (동일 패치 포함) ===== */
+/* ===== Big screen (가운데 시작 버튼 적용) ===== */
 function bigHtml(theme, itemsInit, dupe, ang){
   return `<!DOCTYPE html><html lang="ko" data-theme="${theme}"><head><meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 룰렛</title>
@@ -566,6 +579,7 @@ canvas{width:min(92vmin,1200px);height:min(92vmin,1200px);z-index:10}
 .controls{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:70}
 .btn{all:unset;background:#1a1f42d9;border:1px solid #3a47b8aa;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;color:#fff}
 html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1a237e}
+.center-start{position:absolute;width:min(20vmin,220px);height:min(20vmin,220px);border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:min(3.2vmin,28px);color:#fff;background: radial-gradient(circle at 35% 30%, #7bd3ff, var(--acc) 60%, var(--acc2) 100%);border: min(1.2vmin,12px) solid #fff;box-shadow:0 14px 24px rgba(0,0,0,.35);cursor:pointer;user-select:none;z-index:40}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
 .modal.show{display:flex}
 .backdrop{position:absolute;inset:0;background:rgba(5,8,25,.6);backdrop-filter:blur(3px)}
@@ -578,10 +592,11 @@ html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1
 .pill{padding:14px 18px;border-radius:12px;border:2px solid #6aa8ff;background:linear-gradient(180deg,var(--acc),var(--acc2));cursor:pointer;color:#fff;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 20px rgba(58,120,255,.28)}
 .pill.secondary{background:#1a1f42d9;border-color:#3a47b8aa}
 </style></head><body>
-<div class="controls"><button class="btn" id="start">▶ 시작</button><button class="btn" id="reset">↺ 초기화</button></div>
+<div class="controls"><button class="btn" id="reset">↺ 초기화</button></div>
 <div class="stage">
   <div class="pointer"></div>
   <canvas id="C" width="1400" height="1400"></canvas>
+  <button class="center-start" id="startCenter">시작</button>
 </div>
 <div id="modal" class="modal" aria-hidden="true">
   <div class="backdrop"></div>
@@ -598,7 +613,6 @@ html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1
 <script>
 const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
 const C=document.getElementById('C'), X=C.getContext('2d');
-// ★ 동일 패치: 폰트 px 추출
 const getFontPx=(ctx)=>{const m=ctx.font.match(/(\\d+(?:\\.\\d+)?)px/);return m?Number(m[1]):16;}
 let items=${JSON.stringify([])}; items=${JSON.stringify(items)};
 let allow=${allowDuplicate?'true':'false'}, angle=${angle||0}, spinning=false, seg=[];
@@ -645,9 +659,7 @@ function draw(){ const W=C.width,H=C.height; X.clearRect(0,0,W,H); X.save(); X.t
     const radial=R*0.70, pad=Math.min((s.end-s.start)/2-0.05,0.5), maxArc=(s.end-s.start)-pad*2, maxW=Math.max(80, radial*maxArc);
     const lines=wrapFit(X, s.label, maxW, 3, 44, 16);
     const textColor=txtColor(hue);
-    // ★ 줄 높이 계산 패치
-    const fs=getFontPx(X);
-    const lh=fs+6;
+    const fs=getFontPx(X), lh=fs+6;
     const boxW=Math.min(maxW, Math.max(...lines.map(m=>m.w))+28), boxH=lines.length*lh+16;
     X.globalAlpha=0.22; roundedRect(X, radial-boxW/2, -boxH/2, boxW, boxH, 14); X.fillStyle=(textColor==='#fff')?'#000':'#fff'; X.fill(); X.globalAlpha=1;
     X.fillStyle=textColor; X.textAlign='center'; X.textBaseline='middle';
@@ -672,7 +684,8 @@ function openModal(q,a){ const modal=document.getElementById('modal'); const mQ=
 function spin(){ if(spinning||seg.length===0) return; const modal=document.getElementById('modal'); if(modal) modal.classList.remove('show'); spinning=true; const i=pick(),tgt=target(i),st=angle,dur=3600+Math.random()*1400,t0=performance.now();
  (function anim(now){ const t=Math.min((now-t0)/dur,1), ease=1-Math.pow(1-t,3); angle=st+(tgt-st)*ease; draw(); if(t<1) requestAnimationFrame(anim); else{ angle=tgt; draw();
    const idx=(getAtPointer()>=0)?getAtPointer():i; const pickLbl=seg[idx]; openModal(pickLbl.label, pickLbl.answer||''); if(!allow){ const k=items.findIndex(o=>o.label===pickLbl.label); if(k>=0) items.splice(k,1); rebuild(); } spinning=false; } })(t0); }
-document.getElementById('start').onclick=spin; document.getElementById('reset').onclick=()=>{ angle=0; draw(); const m=document.getElementById('modal'); if(m) m.classList.remove('show'); };
+document.getElementById('startCenter').onclick=spin;
+document.getElementById('reset').onclick=()=>{ angle=0; draw(); const m=document.getElementById('modal'); if(m) m.classList.remove('show'); };
 
 rebuild();
 <\/script></body></html>`;
