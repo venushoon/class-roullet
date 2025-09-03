@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>룰렛 프로그램 | Roullet</title>
+<title>퀴즈 룰렛 | Roullet</title>
 <style>
   :root{
     --bg-1:#0f1220; --bg-2:#171a2b; --panel:#1b2142cc;
@@ -13,6 +13,7 @@
     --panel-line:#2a2f55; --section-bg:#12173180;
     --ring:0 0 0 3px rgba(88,101,242,.28); --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
     --input-bg:#0f1433; --input-br:#2f3566;
+    --accent:#7bd3ff; --accent2:#0b76d1;
   }
   html[data-theme="light"]{
     --bg-1:#f6f7fb; --bg-2:#eef1fb; --panel:#ffffffee;
@@ -33,7 +34,7 @@
       linear-gradient(180deg,var(--bg-1),var(--bg-2));
   }
 
-  .wrap{display:grid;grid-template-columns:minmax(360px,1fr) 480px;gap:20px;height:100%;padding:20px}
+  .wrap{display:grid;grid-template-columns:minmax(360px,1fr) 520px;gap:20px;height:100%;padding:20px}
   .panel{background:var(--panel);backdrop-filter:blur(8px);border:1px solid var(--panel-line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .left{position:relative;display:grid;grid-template-rows:auto 1fr;align-items:center;justify-items:center;padding:24px}
   .title{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -45,30 +46,30 @@
     width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:28px solid #ff5a5a;
     filter:drop-shadow(0 10px 14px rgba(0,0,0,.45)); z-index:50;}
   .center-start{
-    position:absolute; width:160px; height:160px; border-radius:50%;
+    position:absolute; width:170px; height:170px; border-radius:50%;
     display:grid; place-items:center; font-weight:900; font-size:22px; color:#fff;
-    background: radial-gradient(circle at 35% 30%, #ffa142, #ff7a1f 60%, #e4551a 100%);
+    background: radial-gradient(circle at 35% 30%, var(--accent), #3aa7ff 60%, var(--accent2) 100%);
     border:10px solid #fff; box-shadow:0 14px 24px rgba(0,0,0,.35); cursor:pointer; user-select:none; z-index:40;}
   .center-start:disabled{ filter:grayscale(.4) brightness(.9); cursor:not-allowed; }
   .result-overlay{position:absolute; left:0; right:0; bottom:10px; display:grid; place-items:center; pointer-events:none; z-index:60;}
-  .result-badge{display:none; padding:12px 16px; border-radius:12px; font-size:34px; font-weight:900; color:#fff;
-    background:#0b1139e6; border:2px solid #3b4bd4a6; box-shadow:0 18px 32px rgba(0,0,0,.45);}
+  .result-badge{display:none; padding:12px 16px; border-radius:12px; font-size:30px; font-weight:900; color:#fff;
+    background:#0b1139e6; border:2px solid #3b4bd4a6; box-shadow:0 18px 32px rgba(0,0,0,.45)}
 
   .right{display:flex;flex-direction:column;padding:18px;gap:14px}
   .section{padding:14px;border-radius:12px;background:var(--section-bg);border:1px solid var(--panel-line)}
   .section h2{font-size:14px;font-weight:800;letter-spacing:.4px;margin:0 0 10px 0;color:#7c8bff;text-transform:uppercase}
 
-  .input-row{display:flex;gap:10px;align-items:center}
-  .input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);outline:none;transition:box-shadow .15s,border-color .15s;font-size:15px}
-  .input::placeholder{color:var(--muted)} .input:focus{box-shadow:var(--ring);border-color:#7c8bff}
-
-  /* 고스트 버튼(통일) */
+  /* 입력 영역: 자동 줄높이 textarea */
+  .input-row{display:flex;gap:10px;align-items:flex-start}
+  .ta{flex:1;min-height:48px;max-height:180px;overflow:auto;resize:none;
+      padding:12px 14px;border-radius:12px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);
+      outline:none;transition:box-shadow .15s,border-color .15s;font-size:15px;line-height:1.4}
+  .ta::placeholder{color:var(--muted)} .ta:focus{box-shadow:var(--ring);border-color:#7c8bff}
   .btn{all:unset;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;cursor:pointer;
        color:#fff;font-weight:800;font-size:14px;background:var(--ghost-bg);border:1px solid var(--ghost-br);transition:transform .08s,filter .2s}
   .btn:active{transform:translateY(1px)} .btn:hover{filter:brightness(1.05)}
   .btn-primary{background:linear-gradient(180deg,var(--btn1),var(--btn2));border:1px solid var(--btn-br);box-shadow:0 10px 20px rgba(37,48,140,.35)}
   .btn-s{padding:8px 10px;font-size:12.5px;border-radius:10px}
-
   .row-3{display:flex;gap:10px;align-items:center;margin-top:8px}
 
   .table{border:1px solid var(--panel-line);border-radius:12px;padding:10px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.02))}
@@ -77,14 +78,29 @@
   th{color:var(--muted);font-weight:700}
   .td-index{width:30px;color:var(--muted);text-align:right;padding-right:6px}
   .td-label input{width:100%;padding:7px 9px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text)}
+  .td-ans input{width:100%;padding:7px 9px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text)}
   .td-weight input{width:80px;padding:7px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);text-align:right}
   .td-actions{width:40px;text-align:right}
   .icon-btn{all:unset;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;border:1px solid var(--ghost-br);background:var(--ghost-bg);cursor:pointer}
   .icon-btn:hover{filter:brightness(1.05)}
   .toolbar{display:flex;gap:8px;justify-content:flex-end;margin:-2px 0 8px}
 
-  .hidden{display:none !important}
-  @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+  /* 퀴즈 팝업 */
+  .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(6,10,24,.55);backdrop-filter:blur(6px);z-index:100}
+  .card{width:min(720px,90vw);border-radius:20px;border:1px solid #4b57ff55;background:linear-gradient(180deg,#0e1334,#0a0f2a);color:#fff;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+  html[data-theme="light"] .card{background:#ffffff;border-color:#c9d1ff;color:#101322}
+  .card-head{padding:18px 20px;border-bottom:1px solid #3a47b844;display:flex;align-items:center;gap:10px}
+  .chip{padding:6px 10px;border-radius:999px;background:#2330a8;color:#fff;font-weight:800;font-size:12px;border:1px solid #4b57ff88}
+  html[data-theme="light"] .chip{background:#eef0ff;color:#1a237e;border-color:#c9d1ff}
+  .card-body{padding:22px 20px}
+  .q{font-weight:900;font-size:24px;line-height:1.5;white-space:pre-wrap}
+  .a{margin-top:14px;padding:14px 14px;border-radius:12px;border:1px dashed #6b76ff;background:#161b3a}
+  html[data-theme="light"] .a{background:#f4f6ff;border-color:#c9d1ff}
+  .a[hidden]{display:none}
+  .card-foot{padding:16px 20px;border-top:1px solid #3a47b844;display:flex;gap:10px;justify-content:flex-end}
+  .btn-ghost{all:unset;cursor:pointer;padding:10px 14px;border-radius:12px;background:var(--ghost-bg);border:1px solid var(--ghost-br);color:#fff;font-weight:800}
+  .btn-accent{all:unset;cursor:pointer;padding:10px 14px;border-radius:12px;background:linear-gradient(180deg,var(--accent),var(--accent2));color:#00122a;font-weight:900;border:1px solid #59b7ff}
+  html[data-theme="light"] .btn-ghost{background:#f3f5ff;border-color:#c9d1ff;color:#1a237e}
 </style>
 </head>
 <body>
@@ -92,7 +108,7 @@
     <!-- LEFT -->
     <div class="panel left">
       <div class="title">
-        <h1>🎡 룰렛</h1>
+        <h1>🎯 퀴즈 룰렛</h1>
         <div style="display:flex;gap:8px">
           <button class="btn btn-s" id="btnReset">↺ 초기화</button>
           <button class="btn btn-s" id="btnBig">🖥 대형</button>
@@ -102,7 +118,7 @@
       <div class="canvas-box" id="canvasBox">
         <div class="pointer" aria-hidden="true"></div>
         <canvas id="wheel" width="920" height="920"></canvas>
-        <button id="btnCenterStart" class="center-start">시작하기</button>
+        <button id="btnCenterStart" class="center-start">시작</button>
         <div class="result-overlay"><div id="resultBadge" class="result-badge"></div></div>
       </div>
     </div>
@@ -110,13 +126,12 @@
     <!-- RIGHT -->
     <aside class="panel right">
       <div class="section">
-        <h2>입력 · 불러오기</h2>
+        <h2>퀴즈 입력</h2>
         <div class="input-row">
-          <input id="itemInput" class="input" type="text" placeholder="한 줄에 1개 입력 후 Enter" />
+          <textarea id="quizInput" class="ta" placeholder="예) 바닷물은 왜 짤까요? :: 염분(소금)이 녹아 있어서  &#10;Enter=추가, Shift+Enter=줄바꿈"></textarea>
           <button class="btn btn-primary" id="btnAdd">+ 추가</button>
         </div>
 
-        <!-- 한 줄 3버튼: 항목보기/파일/샘플 -->
         <div class="row-3">
           <button class="btn" id="btnToggleList">👁 항목 보기/숨기기</button>
           <button class="btn" id="btnLoadFile">📁 파일 불러오기</button>
@@ -124,7 +139,7 @@
           <input id="fileInput" type="file" accept=".txt,.csv" class="hidden" />
         </div>
 
-        <!-- 항목+비중 편집 테이블 (툴바: 저장/전체지우기) -->
+        <!-- 편집 테이블 -->
         <div id="editorWrap" class="table hidden" style="margin-top:10px">
           <div class="toolbar">
             <button class="btn btn-s" id="btnSave">💾 저장하기</button>
@@ -132,13 +147,12 @@
           </div>
           <table>
             <thead>
-              <tr><th class="td-index">#</th><th>항목</th><th style="width:100px">비중</th><th class="td-actions"></th></tr>
+              <tr><th class="td-index">#</th><th>문항(퀴즈)</th><th>정답</th><th style="width:100px">비중</th><th class="td-actions"></th></tr>
             </thead>
             <tbody id="itemTable"></tbody>
           </table>
         </div>
 
-        <!-- 기록 섹션: 동일 고스트 스타일 -->
         <div class="section" style="margin-top:12px">
           <h2>추첨 기록</h2>
           <div style="display:flex;gap:10px;margin-bottom:8px">
@@ -151,7 +165,7 @@
         <div class="section" style="margin-top:12px">
           <h2>옵션</h2>
           <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
-            <input id="chkDupe" type="checkbox" checked /> 뽑기 중복 허용(체크 시 당첨 후 삭제 안 함)
+            <input id="chkDupe" type="checkbox" checked /> 중복 허용(당첨 후 삭제 안 함)
           </label>
           <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
             <input id="chkTheme" type="checkbox" /> 밝은(프로젝터) 모드
@@ -161,24 +175,71 @@
     </aside>
   </div>
 
+  <!-- 퀴즈 팝업 -->
+  <div id="quizModal" class="modal">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="qTitle">
+      <div class="card-head">
+        <span class="chip">퀴즈</span>
+        <div id="qTitle" style="font-weight:900">당첨 문항</div>
+      </div>
+      <div class="card-body">
+        <div id="qText" class="q"></div>
+        <div id="aText" class="a" hidden></div>
+      </div>
+      <div class="card-foot">
+        <button id="btnShowAns" class="btn-accent">정답 보기</button>
+        <button id="btnClose" class="btn-ghost">닫기</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 /* ===== Helpers ===== */
 const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
 const qs=id=>document.getElementById(id);
-const norm=a=> (a%TWO_PI + TWO_PI)%TWO_PI;
 const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmtTime=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
-const show=el=>el.classList.remove('hidden'); const hide=el=>el.classList.add('hidden'); const toggle=el=>el.classList.toggle('hidden');
+const show=el=>el.style.display='' ; const hide=el=>el.style.display='none'; const toggle=(el)=>{ el.style.display = (getComputedStyle(el).display==='none'?'':'none'); };
 
 /* ===== State ===== */
-let items=[]; let segments=[]; let allowDuplicate=true;
-let angle=0, spinning=false; const historyLog=[];
+let items=[]; // {label (question), answer, weight:null|number}
+let segments=[];
+let allowDuplicate=true;
+let angle=0, spinning=false;
+const historyLog=[];
 
 /* ===== DOM ===== */
 const canvas=qs('wheel'), ctx=canvas.getContext('2d');
-const ipt=qs('itemInput'); const resultBadge=qs('resultBadge');
-const editorWrap=qs('editorWrap'); const itemTable=qs('itemTable');
-const logBox=qs('logBox'); const fileInput=qs('fileInput');
+const ta=qs('quizInput');
+const editorWrap=qs('editorWrap'), itemTable=qs('itemTable');
+const logBox=qs('logBox'), fileInput=qs('fileInput');
+const modal=qs('quizModal'), qText=qs('qText'), aText=qs('aText'), btnShowAns=qs('btnShowAns'), btnClose=qs('btnClose');
+
+/* ===== Auto-resize textarea ===== */
+function autosize(el){ el.style.height="auto"; const max=180; el.style.height=Math.min(el.scrollHeight, max)+"px"; }
+ta.addEventListener('input', ()=>autosize(ta)); autosize(ta);
+
+/* ===== Add input (Enter / Shift+Enter newline) ===== */
+let composing=false;
+ta.addEventListener('compositionstart',()=>{composing=true;});
+ta.addEventListener('compositionend',()=>{composing=false;});
+function splitQA(v){
+  const i=v.indexOf('::');
+  if(i===-1) return {q:v.trim(), a:''};
+  return {q:v.slice(0,i).trim(), a:v.slice(i+2).trim()};
+}
+function addFromTextarea(){
+  if(composing) return;
+  let v=(ta.value||'').replace(/\r/g,'').trim(); if(!v) return;
+  const {q,a}=splitQA(v);
+  items.push({label:q, answer:a, weight:null});
+  ta.value=''; autosize(ta);
+  showEditor(); rebuildSegments();
+}
+qs('btnAdd').addEventListener('click', addFromTextarea);
+ta.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey && !e.isComposing && !composing){ e.preventDefault(); addFromTextarea(); }
+});
 
 /* ===== Build segments (weights) ===== */
 function rebuildSegments(){
@@ -198,60 +259,116 @@ function rebuildSegments(){
   segments=[]; let acc=0;
   for(let i=0;i<n;i++){
     const start=acc*TWO_PI, end=(acc+fracs[i])*TWO_PI;
-    segments.push({label:items[i].label,start,end,center:(start+end)/2,weight:weights[i]}); acc+=fracs[i];
+    segments.push({label:items[i].label,answer:items[i].answer,start,end,center:(start+end)/2,weight:weights[i]}); acc+=fracs[i];
   }
   drawWheel();
 }
 
-/* ===== Draw wheel ===== */
+/* ===== Draw wheel (text fit inside slice) ===== */
 function drawWheel(){
   const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
   ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(angle);
-  const R=Math.min(W,H)/2-36, rimO=R+26, rimI=R+6, innerW=R+2;
+  const R=Math.min(W,H)/2-36, rimO=R+26,rimI=R+6, innerW=R+2;
 
+  // rim
   ctx.save(); ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=18;
   ctx.beginPath(); ctx.arc(0,0,rimO,0,TWO_PI); ctx.fillStyle='#0a0c12'; ctx.fill(); ctx.restore();
   ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(0,0,rimI,0,TWO_PI); ctx.fill();
   ctx.globalCompositeOperation='source-over';
   ctx.beginPath(); ctx.arc(0,0,innerW,0,TWO_PI); ctx.strokeStyle='#fff'; ctx.lineWidth=6; ctx.stroke();
 
+  // bolts
   for(let i=0;i<8;i++){ const a=i*(TWO_PI/8), r=(rimO+rimI)/2, x=Math.cos(a)*r, y=Math.sin(a)*r;
     ctx.beginPath(); ctx.arc(x,y,8,0,TWO_PI); ctx.fillStyle='#e6e8ef'; ctx.fill();
     ctx.beginPath(); ctx.arc(x,y,3.2,0,TWO_PI); ctx.fillStyle='#1b1e2a'; ctx.fill();
   }
+
   if(segments.length){
     for(let i=0;i<segments.length;i++){
       const s=segments[i], hue=Math.floor((360/segments.length)*i);
+      // slice
       ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,s.start,s.end); ctx.closePath();
       ctx.fillStyle=`hsl(${hue} 75% 52%)`; ctx.fill();
       ctx.strokeStyle="rgba(5,10,30,.6)"; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,0,R,s.start,s.end); ctx.stroke();
 
+      // text box region
       ctx.save(); ctx.rotate(s.center);
-      const rr=R*0.72;
-      roundedRect(ctx, rr-92, -22, 184, 44, 12); ctx.fillStyle="rgba(4,7,22,.35)"; ctx.fill();
+      const radial = R*0.70;
+      const padAng = Math.min( (s.end-s.start)/2 - 0.05, 0.5 );
+      const maxArc = (s.end - s.start) - padAng*2;
+      const maxWidth = radial * maxArc;
+
+      // combine question (short preview)
+      const preview = s.label;
+      const lines = wrapFit(ctx, preview, maxWidth, 3, 28, 12);
+      const lineH = parseInt(ctx.font,10) + 6;
+      const boxW = Math.min(maxWidth, Math.max(...lines.map(m=>m.w))+20);
+      const boxH = lines.length * lineH + 12;
+      roundedRect(ctx, radial - boxW/2, -boxH/2, boxW, boxH, 12);
+      ctx.fillStyle="rgba(4,7,22,.35)"; ctx.fill();
+
       ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.font="700 28px ui-sans-serif,system-ui,'Noto Sans KR'"; ctx.fillText(s.label, rr, 0);
+      let y = -((lines.length-1)/2)*lineH;
+      for(const ln of lines){ ctx.fillText(ln.t, radial, y); y += lineH; }
       ctx.restore();
     }
   }else{
     ctx.beginPath(); ctx.arc(0,0,R,0,TWO_PI); ctx.fillStyle='#3b4a9e'; ctx.fill();
   }
+  // hub
   ctx.beginPath(); ctx.arc(0,0,80,0,TWO_PI);
-  const g=ctx.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#ff8a3d'); g.addColorStop(1,'#e4551a'); ctx.fillStyle=g; ctx.fill();
+  const g=ctx.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#7bd3ff'); g.addColorStop(1,'#0b76d1'); ctx.fillStyle=g; ctx.fill();
   ctx.beginPath(); ctx.arc(0,0,90,0,TWO_PI); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=10; ctx.stroke();
   ctx.restore();
+}
+
+/* text fitting helper */
+function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){
+  let size=basePx;
+  const words = text.split(/\s+/);
+  while(size>=minPx){
+    ctx.font = `700 ${size}px ui-sans-serif,system-ui,'Noto Sans KR'`;
+    const lines=[]; let line='', w=0;
+    for(let i=0;i<words.length;i++){
+      const trial = line ? line+' '+words[i] : words[i];
+      const m = ctx.measureText(trial).width;
+      if(m<=maxW){ line=trial; w=m; }
+      else{
+        if(line) lines.push({t:line,w});
+        else lines.push({t:words[i], w:m});
+        line=''; w=0; i--;
+      }
+      if(lines.length===maxLines) break;
+    }
+    if(line && lines.length<maxLines) lines.push({t:line, w:ctx.measureText(line).width});
+    if(lines.length<=maxLines && Math.max(...lines.map(o=>o.w))<=maxW) return lines;
+    size -= 2;
+  }
+  // fallback with ellipsis
+  ctx.font = `700 ${minPx}px ui-sans-serif,system-ui,'Noto Sans KR'`;
+  const ell='…'; const res=[]; let line='', w=0;
+  for(const word of words){
+    const trial=line?line+' '+word:word, m=ctx.measureText(trial).width;
+    if(m<=maxW){ line=trial; w=m; }
+    else{
+      if(res.length===maxLines-1){
+        let cut=line;
+        while(ctx.measureText(cut+ell).width>maxW && cut.length>0) cut=cut.slice(0,-1);
+        res.push({t:cut+ell, w:ctx.measureText(cut+ell).width}); return res;
+      }
+      res.push({t:line, w}); line=word; w=ctx.measureText(word).width;
+    }
+  }
+  if(line && res.length<maxLines) res.push({t:line,w:ctx.measureText(line).width});
+  return res;
 }
 function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
 /* ===== Spin ===== */
 const normAngle=a=>(a%TWO_PI+TWO_PI)%TWO_PI;
-function pickIndexWeighted(){
-  const total=segments.reduce((a,s)=>a+(s.end-s.start),0);
-  let r=Math.random()*total, acc=0;
-  for(let i=0;i<segments.length;i++){ const len=segments[i].end-segments[i].start; if(r<acc+len) return i; acc+=len; }
-  return segments.length-1;
-}
+function pickIndexWeighted(){ const total=segments.reduce((a,s)=>a+(s.end-s.start),0); let r=Math.random()*total, acc=0;
+  for(let i=0;i<segments.length;i++){ const len=segments[i].end-segments[i].start; if(r<acc+len) return i; acc+=len; } return segments.length-1; }
 function targetAngleForIndex(i){
   const desired = POINTER_ANGLE - segments[i].center;
   const delta = normAngle(desired - angle);
@@ -260,7 +377,8 @@ function targetAngleForIndex(i){
 }
 function spin(){
   if(spinning || segments.length===0) return;
-  hide(resultBadge); spinning=true; qs('btnCenterStart').disabled=true;
+  hide(resultBadge); // 기존 작은 배지 숨김 유지
+  spinning=true; qs('btnCenterStart').disabled=true;
   const idx=pickIndexWeighted(); const target=targetAngleForIndex(idx);
   const start=angle, duration=3600+Math.random()*1400, t0=performance.now();
   (function anim(now){
@@ -276,13 +394,28 @@ function getIndexAtPointer(){
 }
 function onWin(idx){
   const ptr=getIndexAtPointer(); const final=ptr>=0?ptr:idx;
-  const pick=segments[final].label;
-  resultBadge.textContent = `🎉 ${pick}`; show(resultBadge);
-  historyLog.unshift({t:new Date(), v:pick}); renderLog();
+  const pick=segments[final];
+  // 로그
+  historyLog.unshift({t:new Date(), v:pick.label}); renderLog();
+  // 팝업 표시
+  openQuizModal(pick.label, pick.answer);
+  // 중복 미허용이면 제거
   if(!allowDuplicate){
-    const k=items.findIndex(o=>o.label===pick); if(k>=0){ items.splice(k,1); rebuildSegments(); renderEditor(); }
+    const k=items.findIndex(o=>o.label===pick.label && o.answer===pick.answer);
+    if(k>=0){ items.splice(k,1); rebuildSegments(); renderEditor(); }
   }
 }
+
+/* ===== Quiz Modal ===== */
+function openQuizModal(q, a){
+  qText.textContent = q || '(문항 없음)';
+  if(a && a.trim()){ aText.textContent = '정답: ' + a; aText.hidden=false; hide(btnShowAns); }
+  else { aText.textContent=''; aText.hidden=true; show(btnShowAns); }
+  show(modal);
+}
+btnShowAns.addEventListener('click', ()=>{ aText.textContent = '정답: ' + (aText.textContent.replace(/^정답:\s*/,'') || ''); aText.hidden=false; hide(btnShowAns); });
+btnClose.addEventListener('click', ()=> hide(modal));
+modal.addEventListener('click', (e)=>{ if(e.target===modal) hide(modal); });
 
 /* ===== Editor ===== */
 function renderEditor(){
@@ -290,6 +423,7 @@ function renderEditor(){
     <tr>
       <td class="td-index">${i+1}.</td>
       <td class="td-label"><input data-k="${i}" class="ipt-label" value="${escapeHtml(o.label)}" /></td>
+      <td class="td-ans"><input data-k="${i}" class="ipt-ans" value="${escapeHtml(o.answer||'')}" placeholder="정답(선택)" /></td>
       <td class="td-weight"><input data-k="${i}" class="ipt-weight" type="number" min="0" step="0.1" placeholder="-" value="${o.weight??''}"/></td>
       <td class="td-actions">
         <button class="icon-btn btn-del" title="삭제" data-k="${i}">
@@ -299,68 +433,33 @@ function renderEditor(){
           </svg>
         </button>
       </td>
-    </tr>`).join('') : `<tr><td colspan="4" style="opacity:.7;padding:10px">항목이 없습니다.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="5" style="opacity:.7;padding:10px">항목이 없습니다.</td></tr>`;
 }
-/* 저장 전에 DOM → 상태 강제 동기화 */
-function syncEditorToState(){
-  document.querySelectorAll('.ipt-label').forEach(el=>{
-    const k=+el.dataset.k; if(items[k]) items[k].label = el.value;
-  });
-  document.querySelectorAll('.ipt-weight').forEach(el=>{
-    const k=+el.dataset.k; if(items[k]) items[k].weight = (el.value===''? null : Number(el.value));
-  });
-}
-function showEditor(){ renderEditor(); show(editorWrap); }
-function hideEditor(){ hide(editorWrap); }
+function showEditor(){ renderEditor(); editorWrap.classList.remove('hidden'); }
+function hideEditor(){ editorWrap.classList.add('hidden'); }
 
-/* 입력(Enter 고장 방지) */
-let composing=false;
-ipt.addEventListener('compositionstart',()=>{composing=true;});
-ipt.addEventListener('compositionend',()=>{composing=false;});
-function addFromInput(){
-  if(composing) return;
-  let v=(ipt.value||'').replace(/\s+/g,' ').trim(); if(!v) return;
-  items.push({label:v, weight:null}); ipt.value=''; showEditor(); rebuildSegments();
-}
-qs('btnAdd').addEventListener('click', addFromInput);
-function onEnter(e){
-  if(e.key!=='Enter') return;
-  if(e.isComposing || composing) return;
-  e.preventDefault(); e.stopPropagation(); addFromInput();
-}
-ipt.addEventListener('keydown', onEnter);
-ipt.addEventListener('keyup', onEnter);
-
-/* 편집 이벤트: input/change/blur 모두 수집 */
-function onEdit(e){
-  const t=e.target;
-  if(t.classList.contains('ipt-weight')){
-    const k=+t.dataset.k; items[k].weight = (t.value===''? null : Number(t.value));
-  }
-  if(t.classList.contains('ipt-label')){
-    const k=+t.dataset.k; items[k].label = t.value;
-  }
-}
-itemTable.addEventListener('input', onEdit);
-itemTable.addEventListener('change', onEdit);
-itemTable.addEventListener('blur', onEdit, true);
-
-itemTable.addEventListener('click', e=>{
-  const delBtn = e.target.closest('.btn-del');
-  if(delBtn){ const k=+delBtn.dataset.k; items.splice(k,1); renderEditor(); rebuildSegments(); if(!items.length) hideEditor(); }
-});
-
-/* 저장 / 전체 비중 지우기 (에디터 내부) */
+/* 저장/지우기 */
 qs('btnSave').addEventListener('click', ()=>{
-  syncEditorToState();          // ★ 최신 입력값 강제 반영
-  rebuildSegments();            // 룰렛 갱신
-  hideEditor();                 // 자동 숨김
-  alert('저장 완료! 룰렛에 비중을 반영했습니다.');
+  document.querySelectorAll('.ipt-label').forEach(el=>{ const k=+el.dataset.k; if(items[k]) items[k].label=el.value; });
+  document.querySelectorAll('.ipt-ans').forEach(el=>{ const k=+el.dataset.k; if(items[k]) items[k].answer=el.value; });
+  document.querySelectorAll('.ipt-weight').forEach(el=>{ const k=+el.dataset.k; if(items[k]) items[k].weight=(el.value===''?null:Number(el.value)); });
+  rebuildSegments(); hideEditor(); alert('저장 완료! 룰렛에 반영했습니다.');
 });
 qs('btnClearWeight').addEventListener('click', ()=>{ items.forEach(o=>o.weight=null); renderEditor(); rebuildSegments(); });
 
+/* 편집 이벤트 즉시 반영 */
+itemTable.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.classList.contains('ipt-weight')){ const k=+t.dataset.k; items[k].weight=(t.value===''?null:Number(t.value)); rebuildSegments(); }
+  if(t.classList.contains('ipt-label')){ const k=+t.dataset.k; items[k].label=t.value; rebuildSegments(); }
+  if(t.classList.contains('ipt-ans')){ const k=+t.dataset.k; items[k].answer=t.value; }
+});
+itemTable.addEventListener('click', e=>{
+  const delBtn=e.target.closest('.btn-del'); if(delBtn){ const k=+delBtn.dataset.k; items.splice(k,1); renderEditor(); rebuildSegments(); if(!items.length) hideEditor(); }
+});
+
 /* 항목 보기/숨기기 */
-qs('btnToggleList').addEventListener('click', ()=>{ if(editorWrap.classList.contains('hidden')) renderEditor(); toggle(editorWrap); });
+qs('btnToggleList').addEventListener('click', ()=>{ if(editorWrap.classList.contains('hidden')) renderEditor(); editorWrap.classList.toggle('hidden'); });
 
 /* 기록 */
 function renderLog(){
@@ -386,34 +485,40 @@ fileInput.addEventListener('change', async (e)=>{
   }catch(err){ alert('파일 읽기 오류'); console.error(err); }
   fileInput.value='';
 });
-function parseTXT(s){ return s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean).map(v=>({label:v,weight:null})); }
+function parseTXT(s){
+  return s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean).map(v=>{
+    const {q,a}=splitQA(v); return ({label:q, answer:a, weight:null});
+  });
+}
 function parseCSV(s){
   const lines=s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean), out=[];
-  for(let i=0;i<lines.length;i++){
-    const line=lines[i]; if(i===0 && /label/i.test(line) && /weight|비중/i.test(line)) continue;
-    const [a,b]=(line.split(',')||[]).map(x=>x?.trim()); if(!a) continue;
-    const w=(b==null||b==='')? null : Number(b); out.push({label:a, weight:isNaN(w)? null : w});
+  // header: label,answer,weight 지원
+  let start=0; if(/label|문항/i.test(lines[0])) start=1;
+  for(let i=start;i<lines.length;i++){
+    const parts=lines[i].split(','); const q=(parts[0]||'').trim(); const a=(parts[1]||'').trim(); const wRaw=(parts[2]||'').trim();
+    if(!q) continue; const w=(wRaw===''? null : Number(wRaw));
+    out.push({label:q, answer:a, weight:isNaN(w)? null : w});
   } return out;
 }
 qs('btnDownloadSamples').addEventListener('click', ()=>{
-  const txt=`사과\n바나나\n체리\n포도`;
-  const csv=`label,weight\n사과,40\n바나나,\n체리,30\n포도,`;
-  download('sample.txt',txt,'text/plain;charset=utf-8'); download('sample.csv',csv,'text/csv;charset=utf-8');
+  const txt=`지구에서 가장 큰 바다는? :: 태평양\n우리 반 규칙을 한 가지 말해보세요 :: 서로 존중하기\n봄의 특징은 무엇일까요? :: 날이 따뜻해지고 꽃이 핌`;
+  const csv=`label,answer,weight\n1+1은?,2,40\n수도의 이름은?,서울,\n우리 학교 이름은?,(자유응답),30`;
+  download('quiz-sample.txt',txt,'text/plain;charset=utf-8'); download('quiz-sample.csv',csv,'text/csv;charset=utf-8');
 });
 function download(name,content,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
 
 /* 컨트롤 */
-qs('btnReset').addEventListener('click', ()=>{ angle=0; hide(resultBadge); drawWheel(); });
+qs('btnReset').addEventListener('click', ()=>{ angle=0; drawWheel(); });
 qs('btnCenterStart').addEventListener('click', spin);
 qs('btnBig').addEventListener('click', ()=>{
   const w = window.open('', '_blank', 'width=1200,height=1000');
   w.document.write(bigHtml(document.documentElement.getAttribute('data-theme')||'dark', items, allowDuplicate, angle)); w.document.close();
 });
 
-/* 대형 화면 */
+/* 대형 화면(팝업 포함) */
 function bigHtml(theme, itemsInit, dupe, ang){
   return `<!DOCTYPE html><html lang="ko" data-theme="${theme}"><head><meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 룰렛</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 퀴즈 룰렛</title>
 <style>
 :root{--bg:#0a0d1f;--tx:#fff} html[data-theme="light"]{--bg:#f6f7fb;--tx:#101322}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:ui-sans-serif,system-ui,'Noto Sans KR',sans-serif}
@@ -422,68 +527,4 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:30px solid #ff5a5a;
   filter:drop-shadow(0 10px 14px rgba(0,0,0,.45)); z-index:50;}
 canvas{width:min(92vmin,1200px);height:min(92vmin,1200px);z-index:10}
-.controls{position:fixed;right:16px;top:16px;display:flex;gap:8px;z-index:70}
-.btn{all:unset;background:#1a1f42d9;border:1px solid #3a47b8aa;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;color:#fff}
-html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1a237e}
-.result{position:fixed;left:0;right:0;bottom:18px;display:grid;place-items:center;z-index:60}
-.result > div{padding:16px 22px;border-radius:16px;font-size:40px;font-weight:900;color:#fff;background:#0b1139e6;border:2px solid #3b4bd4a6;box-shadow:0 18px 32px rgba(0,0,0,.45)}
-</style></head><body>
-<div class="controls"><button class="btn" id="start">▶ 시작</button><button class="btn" id="reset">↺ 초기화</button></div>
-<div class="stage">
-  <div class="pointer"></div>
-  <canvas id="C" width="1400" height="1400"></canvas>
-</div>
-<div class="result"><div id="R" style="display:none"></div></div>
-<script>
-const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
-const C=document.getElementById('C'), X=C.getContext('2d');
-let items=${JSON.stringify(itemsInit)}, allow=${dupe?'true':'false'}, angle=${ang||0}, spinning=false, seg=[];
-function rebuild(){
-  let sum=0, uns=[], w=new Array(items.length).fill(0);
-  for(let i=0;i<items.length;i++){ const x=Number(items[i].weight); if(x>0){w[i]=x; sum+=x;} else uns.push(i); }
-  if(items.length===0){seg=[]; draw(); return;}
-  if(sum===0){ for(let i=0;i<items.length;i++) w[i]=100/items.length; }
-  else{ const rem=Math.max(0,100-sum), share=uns.length? rem/uns.length : 0; for(const i of uns) w[i]=share; }
-  const s=w.reduce((a,b)=>a+b,0)||1, f=w.map(v=>v/s);
-  seg=[]; let a=0; for(let i=0;i<items.length;i++){ const st=a*TWO_PI, en=(a+f[i])*TWO_PI; seg.push({label:items[i].label,start:st,end:en,center:(st+en)/2}); a+=f[i]; }
-  draw();
-}
-function draw(){
-  const W=C.width,H=C.height; X.clearRect(0,0,W,H); X.save(); X.translate(W/2,H/2); X.rotate(angle);
-  const R=Math.min(W,H)/2-36, rimO=R+26, rimI=R+6, innerW=R+2;
-  X.save(); X.shadowColor='rgba(0,0,0,.45)'; X.shadowBlur=18; X.beginPath(); X.arc(0,0,rimO,0,TWO_PI); X.fillStyle='#0a0c12'; X.fill(); X.restore();
-  X.globalCompositeOperation='destination-out'; X.beginPath(); X.arc(0,0,rimI,0,TWO_PI); X.fill(); X.globalCompositeOperation='source-over';
-  X.beginPath(); X.arc(0,0,innerW,0,TWO_PI); X.strokeStyle='rgba(255,255,255,.9)'; X.lineWidth=6; X.stroke();
-  for(let i=0;i<8;i++){ const a=i*(TWO_PI/8), r=(rimO+rimI)/2, x=Math.cos(a)*r, y=Math.sin(a)*r;
-    X.beginPath(); X.arc(x,y,8,0,TWO_PI); X.fillStyle='#e6e8ef'; X.fill();
-    X.beginPath(); X.arc(x,y,3.2,0,TWO_PI); X.fillStyle='#1b1e2a'; X.fill();
-  }
-  if(seg.length){
-    for(let i=0;i<seg.length;i++){
-      const s=seg[i], hue=Math.floor((360/seg.length)*i);
-      X.beginPath(); X.moveTo(0,0); X.arc(0,0,R,s.start,s.end); X.closePath(); X.fillStyle=\`hsl(\${hue} 75% 52%)\`; X.fill();
-      X.strokeStyle='rgba(5,10,30,.55)'; X.lineWidth=6; X.beginPath(); X.arc(0,0,R,s.start,s.end); X.stroke();
-      X.save(); X.rotate(s.center); X.fillStyle='#fff'; X.font="700 42px ui-sans-serif,'Noto Sans KR'"; X.textAlign='center'; X.textBaseline='middle'; X.fillText(s.label, R*0.72, 0); X.restore();
-    }
-  } else { X.beginPath(); X.arc(0,0,R,0,TWO_PI); X.fillStyle='#3b4a9e'; X.fill(); }
-  X.beginPath(); X.arc(0,0,80,0,TWO_PI); const g=X.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#ff8a3d'); g.addColorStop(1,'#e4551a'); X.fillStyle=g; X.fill();
-  X.beginPath(); X.arc(0,0,90,0,TWO_PI); X.strokeStyle='rgba(255,255,255,.9)'; X.lineWidth=10; X.stroke();
-  X.restore();
-}
-function target(i){ const desired=POINTER_ANGLE - seg[i].center; const delta=((desired-angle)%TWO_PI+TWO_PI)%TWO_PI; const turns=6+Math.floor(Math.random()*2); return angle + turns*TWO_PI + delta; }
-function pick(){ const tot=seg.reduce((a,s)=>a+(s.end-s.start),0); let r=Math.random()*tot, acc=0; for(let i=0;i<seg.length;i++){ const len=seg[i].end-seg[i].start; if(r<acc+len) return i; acc+=len; } return seg.length-1; }
-function getIndexAtPointer(){ const a=((POINTER_ANGLE-angle)%TWO_PI+TWO_PI)%TWO_PI; for(let i=0;i<seg.length;i++){const s=seg[i]; if(s.start<=a && a<s.end) return i; if(i===seg.length-1 && Math.abs(a-s.end)<1e-6) return i;} return -1; }
-function spin(){ if(spinning||seg.length===0) return; spinning=true; const i=pick(), tgt=target(i), st=angle, dur=3600+Math.random()*1400, t0=performance.now();
- (function anim(now){ const t=Math.min((now-t0)/dur,1), ease=1-Math.pow(1-t,3); angle=st+(tgt-st)*ease; draw(); if(t<1) requestAnimationFrame(anim); else { angle=tgt; draw();
-   const idx=(getIndexAtPointer()>=0)?getIndexAtPointer():i; const pickLbl=seg[idx].label; const R=document.getElementById('R'); R.style.display='inline-block'; R.textContent='🎉 '+pickLbl;
-   if(!allow){ const k=items.findIndex(o=>o.label===pickLbl); if(k>=0) items.splice(k,1); rebuild(); } spinning=false; } })(t0); }
-document.getElementById('start').onclick=spin; document.getElementById('reset').onclick=()=>{ angle=0; draw(); document.getElementById('R').style.display='none'; };
-rebuild();
-<\/script></body></html>`;
-}
-
-/* Init */
-rebuildSegments(); drawWheel();
-</script>
-</body>
-</html>
+.controls{position:fixed;right:16px;top:16px;display:flex;gap:8px;z
