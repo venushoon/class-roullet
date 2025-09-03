@@ -57,14 +57,12 @@
   .section{padding:14px;border-radius:12px;background:var(--section-bg);border:1px solid var(--panel-line)}
   .section h2{font-size:14px;font-weight:800;letter-spacing:.4px;margin:0 0 10px 0;color:#7c8bff;text-transform:uppercase}
 
-  /* 입력 영역: 자동 줄높이 textarea */
   .input-row{display:flex;gap:10px;align-items:flex-start}
   .ta{flex:1;min-height:48px;max-height:180px;overflow:auto;resize:none;
       padding:12px 14px;border-radius:12px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);
       outline:none;transition:box-shadow .15s,border-color .15s;font-size:15px;line-height:1.4}
   .ta::placeholder{color:var(--muted)} .ta:focus{box-shadow:var(--ring);border-color:#7c8bff}
 
-  /* 버튼 공통(고스트) */
   .btn{all:unset;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;cursor:pointer;
        color:#fff;font-weight:800;font-size:14px;background:var(--ghost-bg);border:1px solid var(--ghost-br);transition:transform .08s,filter .2s}
   .btn:active{transform:translateY(1px)} .btn:hover{filter:brightness(1.05)}
@@ -85,7 +83,6 @@
   .icon-btn:hover{filter:brightness(1.05)}
   .toolbar{display:flex;gap:8px;justify-content:flex-end;margin:-2px 0 8px}
 
-  /* 결과 팝업 모달 */
   .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
   .modal.show{display:flex}
   .backdrop{position:absolute;inset:0;background:rgba(5,8,25,.6);backdrop-filter:blur(3px)}
@@ -196,6 +193,8 @@ const qs=id=>document.getElementById(id);
 const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmtTime=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
 const show=el=>el.classList.remove('hidden'); const hide=el=>el.classList.add('hidden'); const toggle=el=>el.classList.toggle('hidden');
+// ★ 폰트 px 추출 (패치)
+const getFontPx = (ctx) => { const m = ctx.font.match(/(\\d+(?:\\.\\d+)?)px/); return m ? Number(m[1]) : 16; };
 
 /* ===== State ===== */
 let items=[]; // {label, answer, weight:null|number}
@@ -220,7 +219,7 @@ ta.addEventListener('compositionstart',()=>{composing=true;});
 ta.addEventListener('compositionend',()=>{composing=false;});
 function addFromTextarea(){
   if(composing) return;
-  let v=(ta.value||'').replace(/\r/g,'').trim();
+  let v=(ta.value||'').replace(/\\r/g,'').trim();
   if(!v) return;
   let q=v, a="";
   if(v.includes("||")){ const [qq,aa]=v.split("||"); q=qq.trim(); a=(aa||"").trim(); }
@@ -256,7 +255,7 @@ function rebuildSegments(){
 }
 
 /* ===== Color utils for contrast ===== */
-function hslToRgb(h,s,l){ // s,l: [0,1]
+function hslToRgb(h,s,l){
   const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
   let r=0,g=0,b=0;
   if(0<=h && h<60){r=c;g=x;b=0;}
@@ -267,14 +266,14 @@ function hslToRgb(h,s,l){ // s,l: [0,1]
   else{r=c;g=0;b=x;}
   return [(r+m)*255,(g+m)*255,(b+m)*255];
 }
-function luminance(r,g,b){ // r,g,b 0-255
+function luminance(r,g,b){
   const a=[r,g,b].map(v=>{v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);});
   return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2];
 }
 function bestTextColorForHSL(h, sPct=75, lPct=52){
   const s=sPct/100, l=lPct/100; const [r,g,b]=hslToRgb(h,s,l);
   const L=luminance(r,g,b);
-  return (L>0.5)? '#0b0f1c' : '#ffffff'; // 밝은 배경→진한 글자, 어두운 배경→흰 글자
+  return (L>0.5)? '#0b0f1c' : '#ffffff';
 }
 
 /* ===== Draw wheel (text-fit + auto-contrast) ===== */
@@ -311,25 +310,24 @@ function drawWheel(){
       const radial = R*0.70;
       const padAng = Math.min( (s.end-s.start)/2 - 0.05, 0.5 );
       const maxArc = (s.end - s.start) - padAng*2;
-      const maxWidth = Math.max(60, radial * maxArc); // 최소 너비 보장
+      const maxWidth = Math.max(60, radial * maxArc);
       const lines = wrapFit(ctx, s.label, maxWidth, 3, 28, 14);
 
-      // auto contrast vs slice color
       const textColor = bestTextColorForHSL(hue,75,52);
 
-      // subtle backing for extra clarity (투명도 낮게)
-      const lineH = parseInt(ctx.font,10) + 6;
+      // ★ 줄 높이 계산 패치
+      const fs = getFontPx(ctx);
+      const lineH = fs + 6;
+
       const boxW = Math.min(maxWidth, Math.max(...lines.map(m=>m.w))+20);
       const boxH = lines.length * lineH + 12;
       ctx.globalAlpha = 0.22;
       roundedRect(ctx, radial - boxW/2, -boxH/2, boxW, boxH, 12);
-      ctx.fillStyle = (textColor==='#ffffff') ? '#000' : '#fff'; // 텍스트와 반대 계열 배경
+      ctx.fillStyle = (textColor==='#ffffff') ? '#000' : '#fff';
       ctx.fill();
       ctx.globalAlpha = 1;
 
-      // text
       ctx.fillStyle=textColor; ctx.textAlign="center"; ctx.textBaseline="middle";
-      // 얇은 외곽선으로 배경과 분리
       ctx.strokeStyle=(textColor==='#ffffff')?'rgba(0,0,0,.35)':'rgba(255,255,255,.35)'; 
       ctx.lineWidth=2;
 
@@ -355,7 +353,7 @@ function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arc
 /* text fitting with auto font downsize + ellipsis */
 function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){
   let size=basePx;
-  const words = (text||'').split(/\s+/);
+  const words = (text||'').split(/\\s+/);
   while(size>=minPx){
     ctx.font = `700 ${size}px ui-sans-serif,system-ui,'Noto Sans KR'`;
     const lines=[]; let line='', w=0;
@@ -404,7 +402,7 @@ function targetAngleForIndex(i){
 }
 function spin(){
   if(spinning || segments.length===0) return;
-  closeModal(); // 이전 팝업 닫기
+  closeModal();
   spinning=true; qs('btnCenterStart').disabled=true;
   const idx=pickIndexWeighted(); const target=targetAngleForIndex(idx);
   const start=angle, duration=3600+Math.random()*1400, t0=performance.now();
@@ -422,10 +420,8 @@ function getIndexAtPointer(){
 function onWin(idx){
   const ptr=getIndexAtPointer(); const final=ptr>=0?ptr:idx;
   const pick=segments[final];
-  // 기록
   historyLog.unshift({t:new Date(), v:pick.label});
   renderLog();
-  // 팝업 표시
   openModal(pick.label, pick.answer||'');
 }
 
@@ -434,8 +430,7 @@ function openModal(question, answer){
   mQ.innerHTML = escapeHtml(question||'(항목 없음)');
   if(answer){ mA.innerHTML = escapeHtml(answer); mA.style.display='none'; btnReveal.textContent='정답 보기'; btnReveal.disabled=false; }
   else{ mA.innerHTML='(정답 미입력)'; mA.style.display='none'; btnReveal.textContent='정답 없음'; btnReveal.disabled=true; }
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
+  modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
 }
 function closeModal(){
   modal.classList.remove('show');
@@ -476,7 +471,6 @@ function syncEditorToState(){
 function showEditor(){ renderEditor(); show(editorWrap); }
 function hideEditor(){ hide(editorWrap); }
 
-/* 편집 이벤트 실시간 반영 */
 itemTable.addEventListener('input', e=>{
   const t=e.target;
   if(t.classList.contains('ipt-label')){ items[+t.dataset.k].label=t.value; rebuildSegments(); }
@@ -518,20 +512,16 @@ fileInput.addEventListener('change', async (e)=>{
   fileInput.value='';
 });
 function parseTXT(s){
-  return s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean).map(v=>{
+  return s.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean).map(v=>{
     if(v.includes('||')){ const [q,a]=v.split('||'); return {label:q.trim(), answer:(a||'').trim(), weight:null}; }
     return {label:v, answer:'', weight:null};
   });
 }
 function parseCSV(s){
-  // columns: question/label,answer,weight (header 한글/영문 지원)
-  const lines=s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean), out=[];
-  let header=null;
+  const lines=s.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean), out=[];
   if(lines.length){
     const h=lines[0].split(',').map(x=>x.trim().toLowerCase());
-    if(h.includes('question')||h.includes('문항')||h.includes('label')||h.includes('항목')){
-      header=h; lines.shift();
-    }
+    if(h.includes('question')||h.includes('문항')||h.includes('label')||h.includes('항목')) lines.shift();
   }
   for(const line of lines){
     const [a,b,c]=(line.split(',')||[]).map(x=>x?.trim());
@@ -561,7 +551,7 @@ qs('btnBig').addEventListener('click', ()=>{
   w.document.write(bigHtml(document.documentElement.getAttribute('data-theme')||'dark', items, allowDuplicate, angle)); w.document.close();
 });
 
-/* ===== Big screen (같은 기능/시인성) ===== */
+/* ===== Big screen (동일 패치 포함) ===== */
 function bigHtml(theme, itemsInit, dupe, ang){
   return `<!DOCTYPE html><html lang="ko" data-theme="${theme}"><head><meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 룰렛</title>
@@ -608,7 +598,9 @@ html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1
 <script>
 const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
 const C=document.getElementById('C'), X=C.getContext('2d');
-let items=${JSON.stringify([])}; items=${JSON.stringify(items)}; // 초기값 전달
+// ★ 동일 패치: 폰트 px 추출
+const getFontPx=(ctx)=>{const m=ctx.font.match(/(\\d+(?:\\.\\d+)?)px/);return m?Number(m[1]):16;}
+let items=${JSON.stringify([])}; items=${JSON.stringify(items)};
 let allow=${allowDuplicate?'true':'false'}, angle=${angle||0}, spinning=false, seg=[];
 function hslToRgb(h,s,l){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;
  if(0<=h && h<60){r=c;g=x;b=0;} else if(60<=h && h<120){r=x;g=c;b=0;} else if(120<=h && h<180){r=0;g=c;b=x;}
@@ -653,7 +645,10 @@ function draw(){ const W=C.width,H=C.height; X.clearRect(0,0,W,H); X.save(); X.t
     const radial=R*0.70, pad=Math.min((s.end-s.start)/2-0.05,0.5), maxArc=(s.end-s.start)-pad*2, maxW=Math.max(80, radial*maxArc);
     const lines=wrapFit(X, s.label, maxW, 3, 44, 16);
     const textColor=txtColor(hue);
-    const lh=parseInt(X.font,10)+6, boxW=Math.min(maxW, Math.max(...lines.map(m=>m.w))+28), boxH=lines.length*lh+16;
+    // ★ 줄 높이 계산 패치
+    const fs=getFontPx(X);
+    const lh=fs+6;
+    const boxW=Math.min(maxW, Math.max(...lines.map(m=>m.w))+28), boxH=lines.length*lh+16;
     X.globalAlpha=0.22; roundedRect(X, radial-boxW/2, -boxH/2, boxW, boxH, 14); X.fillStyle=(textColor==='#fff')?'#000':'#fff'; X.fill(); X.globalAlpha=1;
     X.fillStyle=textColor; X.textAlign='center'; X.textBaseline='middle';
     X.strokeStyle=(textColor==='#fff')?'rgba(0,0,0,.35)':'rgba(255,255,255,.35)'; X.lineWidth=2;
@@ -668,16 +663,16 @@ function normAngle(a){return (a%TWO_PI+TWO_PI)%TWO_PI}
 function pick(){ const tot=seg.reduce((a,s)=>a+(s.end-s.start),0); let r=Math.random()*tot, acc=0; for(let i=0;i<seg.length;i++){const len=seg[i].end-seg[i].start; if(r<acc+len) return i; acc+=len;} return seg.length-1;}
 function target(i){ const desired=POINTER_ANGLE - seg[i].center; const delta=normAngle(desired-angle); const turns=6+Math.floor(Math.random()*2); return angle+turns*TWO_PI+delta;}
 function getAtPointer(){ const a=normAngle(POINTER_ANGLE-angle); for(let i=0;i<seg.length;i++){const s=seg[i]; if(s.start<=a && a<s.end) return i; if(i===seg.length-1 && Math.abs(a-s.end)<1e-6) return i;} return -1;}
-function spin(){ if(spinning||seg.length===0) return; closeModal(); spinning=true; const i=pick(),tgt=target(i),st=angle,dur=3600+Math.random()*1400,t0=performance.now();
+function openModal(q,a){ const modal=document.getElementById('modal'); const mQ=document.getElementById('mQuestion'); const mA=document.getElementById('mAnswer'); const btnReveal=document.getElementById('btnReveal'); const btnClose=document.getElementById('btnClose');
+ mQ.textContent=q||'(항목 없음)'; mA.textContent=a||'(정답 미입력)'; mA.style.display=a?'none':'none'; btnReveal.textContent=a?'정답 보기':'정답 없음'; btnReveal.disabled=!a; modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+ btnReveal.onclick=()=>{ if(btnReveal.disabled) return; if(mA.style.display==='none'){ mA.style.display='block'; btnReveal.textContent='정답 숨기기'; } else { mA.style.display='none'; btnReveal.textContent='정답 보기'; } };
+ btnClose.onclick=()=>{ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); };
+ modal.querySelector('.backdrop').onclick=btnClose.onclick;
+}
+function spin(){ if(spinning||seg.length===0) return; const modal=document.getElementById('modal'); if(modal) modal.classList.remove('show'); spinning=true; const i=pick(),tgt=target(i),st=angle,dur=3600+Math.random()*1400,t0=performance.now();
  (function anim(now){ const t=Math.min((now-t0)/dur,1), ease=1-Math.pow(1-t,3); angle=st+(tgt-st)*ease; draw(); if(t<1) requestAnimationFrame(anim); else{ angle=tgt; draw();
    const idx=(getAtPointer()>=0)?getAtPointer():i; const pickLbl=seg[idx]; openModal(pickLbl.label, pickLbl.answer||''); if(!allow){ const k=items.findIndex(o=>o.label===pickLbl.label); if(k>=0) items.splice(k,1); rebuild(); } spinning=false; } })(t0); }
-document.getElementById('start').onclick=spin; document.getElementById('reset').onclick=()=>{ angle=0; draw(); closeModal(); };
-
-const modal=document.getElementById('modal'), mQ=document.getElementById('mQuestion'), mA=document.getElementById('mAnswer'), btnReveal=document.getElementById('btnReveal'), btnClose=document.getElementById('btnClose');
-function openModal(q,a){ mQ.textContent=q||'(항목 없음)'; mA.textContent=a||'(정답 미입력)'; mA.style.display=a?'none':'none'; btnReveal.textContent = a? '정답 보기':'정답 없음'; btnReveal.disabled = !a; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); }
-function closeModal(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
-btnReveal.addEventListener('click', ()=>{ if(btnReveal.disabled) return; if(mA.style.display==='none'){ mA.style.display='block'; btnReveal.textContent='정답 숨기기'; } else { mA.style.display='none'; btnReveal.textContent='정답 보기'; } });
-btnClose.addEventListener('click', closeModal); modal.querySelector('.backdrop').addEventListener('click', closeModal); document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+document.getElementById('start').onclick=spin; document.getElementById('reset').onclick=()=>{ angle=0; draw(); const m=document.getElementById('modal'); if(m) m.classList.remove('show'); };
 
 rebuild();
 <\/script></body></html>`;
