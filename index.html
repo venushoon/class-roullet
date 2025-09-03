@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>퀴즈 룰렛 | Roullet</title>
+<title>룰렛 | Roullet</title>
 <style>
   :root{
     --bg-1:#0f1220; --bg-2:#171a2b; --panel:#1b2142cc;
@@ -92,11 +92,13 @@
   .card{position:relative;max-width:min(86vw,880px);min-width:min(70vw,560px);background:linear-gradient(180deg,#121633,#0c0f24);
         color:#fff;border:1px solid #3a47b8aa;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);padding:22px 22px 18px}
   .card h3{margin:0 0 6px 0;font-size:18px;letter-spacing:.3px;color:#9fb0ff}
-  .card .q{white-space:pre-wrap;font-weight:800;font-size:28px;line-height:1.35}
+  .card .q{white-space:pre-wrap;font-weight:900;font-size:28px;line-height:1.35}
   .card .a{white-space:pre-wrap;margin-top:12px;padding:12px;border-radius:12px;background:#0b1139a6;border:1px solid #3b4bd466;font-size:22px;display:none}
   .card .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-  .pill{padding:10px 14px;border-radius:12px;border:1px solid #3a47b8aa;background:#1a1f42d9;cursor:pointer;font-weight:800}
-  .pill.primary{background:linear-gradient(180deg,var(--accent),var(--accent2));border-color:#5aa6ff}
+  .pill{padding:12px 16px;border-radius:12px;border:2px solid #6aa8ff;background:linear-gradient(180deg,var(--accent),var(--accent2));cursor:pointer;
+        color:#fff;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 20px rgba(58,120,255,.28)}
+  .pill.secondary{background:#1a1f42d9;border-color:#3a47b8aa}
+  .pill:active{transform:translateY(1px)}
 
   .hidden{display:none !important}
   @media (max-width:980px){.wrap{grid-template-columns:1fr}.card{min-width:88vw}}
@@ -107,7 +109,7 @@
     <!-- LEFT -->
     <div class="panel left">
       <div class="title">
-        <h1>🎯 퀴즈 룰렛</h1>
+        <h1>🎯 룰렛</h1>
         <div style="display:flex;gap:8px">
           <button class="btn btn-s" id="btnReset">↺ 초기화</button>
           <button class="btn btn-s" id="btnBig">🖥 대형</button>
@@ -124,9 +126,9 @@
     <!-- RIGHT -->
     <aside class="panel right">
       <div class="section">
-        <h2>퀴즈 입력</h2>
+        <h2>입력</h2>
         <div class="input-row">
-          <textarea id="quizInput" class="ta" placeholder="퀴즈 문항을 적고 Enter(추가) / Shift+Enter(줄바꿈)&#10;정답을 함께 넣으려면: 문항 || 정답"></textarea>
+          <textarea id="quizInput" class="ta" placeholder="항목을 적고 Enter(추가) / Shift+Enter(줄바꿈)&#10;정답도 넣으려면: 항목 || 정답"></textarea>
           <button class="btn btn-primary" id="btnAdd">+ 추가</button>
         </div>
 
@@ -145,16 +147,16 @@
           </div>
           <table>
             <thead>
-              <tr><th class="td-index">#</th><th>문항</th><th>정답</th><th style="width:90px">비중</th><th class="td-actions"></th></tr>
+              <tr><th class="td-index">#</th><th>항목</th><th>정답</th><th style="width:90px">비중</th><th class="td-actions"></th></tr>
             </thead>
             <tbody id="itemTable"></tbody>
           </table>
         </div>
 
         <div class="section" style="margin-top:12px">
-          <h2>추첨 기록</h2>
+          <h2>기록</h2>
           <div style="display:flex;gap:10px;margin-bottom:8px">
-            <button class="btn" id="btnToggleLog">📝 기록 보기/숨기기</button>
+            <button class="btn" id="btnToggleLog">📝 보기/숨기기</button>
             <button class="btn" id="btnClearLog">🗑 삭제</button>
           </div>
           <div id="logBox" class="hidden" style="max-height:180px;overflow:auto;font-size:13px;opacity:.9"></div>
@@ -177,12 +179,12 @@
   <div id="modal" class="modal" aria-hidden="true">
     <div class="backdrop"></div>
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-      <h3 id="mTitle">당첨 문항</h3>
+      <h3 id="mTitle">당첨</h3>
       <div id="mQuestion" class="q"></div>
       <div id="mAnswer" class="a"></div>
       <div class="actions">
         <button id="btnReveal" class="pill">정답 보기</button>
-        <button id="btnClose" class="pill primary">닫기</button>
+        <button id="btnClose" class="pill secondary">닫기</button>
       </div>
     </div>
   </div>
@@ -253,7 +255,29 @@ function rebuildSegments(){
   drawWheel();
 }
 
-/* ===== Draw wheel (text-fit) ===== */
+/* ===== Color utils for contrast ===== */
+function hslToRgb(h,s,l){ // s,l: [0,1]
+  const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
+  let r=0,g=0,b=0;
+  if(0<=h && h<60){r=c;g=x;b=0;}
+  else if(60<=h && h<120){r=x;g=c;b=0;}
+  else if(120<=h && h<180){r=0;g=c;b=x;}
+  else if(180<=h && h<240){r=0;g=x;b=c;}
+  else if(240<=h && h<300){r=x;g=0;b=c;}
+  else{r=c;g=0;b=x;}
+  return [(r+m)*255,(g+m)*255,(b+m)*255];
+}
+function luminance(r,g,b){ // r,g,b 0-255
+  const a=[r,g,b].map(v=>{v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);});
+  return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2];
+}
+function bestTextColorForHSL(h, sPct=75, lPct=52){
+  const s=sPct/100, l=lPct/100; const [r,g,b]=hslToRgb(h,s,l);
+  const L=luminance(r,g,b);
+  return (L>0.5)? '#0b0f1c' : '#ffffff'; // 밝은 배경→진한 글자, 어두운 배경→흰 글자
+}
+
+/* ===== Draw wheel (text-fit + auto-contrast) ===== */
 function drawWheel(){
   const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
@@ -266,7 +290,7 @@ function drawWheel(){
   ctx.beginPath(); ctx.arc(0,0,rimO,0,TWO_PI); ctx.fillStyle='#0a0c12'; ctx.fill(); ctx.restore();
   ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(0,0,rimI,0,TWO_PI); ctx.fill();
   ctx.globalCompositeOperation='source-over';
-  ctx.beginPath(); ctx.arc(0,0,innerW,0,TWO_PI); ctx.strokeStyle='#fff'; ctx.lineWidth=6; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,innerW,0,TWO_PI); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=6; ctx.stroke();
 
   for(let i=0;i<8;i++){ const a=i*(TWO_PI/8), r=(rimO+rimI)/2, x=Math.cos(a)*r, y=Math.sin(a)*r;
     ctx.beginPath(); ctx.arc(x,y,8,0,TWO_PI); ctx.fillStyle='#e6e8ef'; ctx.fill();
@@ -276,30 +300,51 @@ function drawWheel(){
   if(segments.length){
     for(let i=0;i<segments.length;i++){
       const s=segments[i], hue=Math.floor((360/segments.length)*i);
+      // slice
       ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,s.start,s.end); ctx.closePath();
-      ctx.fillStyle=`hsl(${hue} 75% 52%)`; ctx.fill();
+      const fill = `hsl(${hue} 75% 52%)`;
+      ctx.fillStyle=fill; ctx.fill();
       ctx.strokeStyle="rgba(5,10,30,.6)"; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,0,R,s.start,s.end); ctx.stroke();
 
+      // text region
       ctx.save(); ctx.rotate(s.center);
       const radial = R*0.70;
       const padAng = Math.min( (s.end-s.start)/2 - 0.05, 0.5 );
       const maxArc = (s.end - s.start) - padAng*2;
-      const maxWidth = radial * maxArc;
-      const lines = wrapFit(ctx, s.label, maxWidth, 3, 28, 12);
+      const maxWidth = Math.max(60, radial * maxArc); // 최소 너비 보장
+      const lines = wrapFit(ctx, s.label, maxWidth, 3, 28, 14);
+
+      // auto contrast vs slice color
+      const textColor = bestTextColorForHSL(hue,75,52);
+
+      // subtle backing for extra clarity (투명도 낮게)
       const lineH = parseInt(ctx.font,10) + 6;
       const boxW = Math.min(maxWidth, Math.max(...lines.map(m=>m.w))+20);
       const boxH = lines.length * lineH + 12;
+      ctx.globalAlpha = 0.22;
       roundedRect(ctx, radial - boxW/2, -boxH/2, boxW, boxH, 12);
-      ctx.fillStyle="rgba(4,7,22,.35)"; ctx.fill();
+      ctx.fillStyle = (textColor==='#ffffff') ? '#000' : '#fff'; // 텍스트와 반대 계열 배경
+      ctx.fill();
+      ctx.globalAlpha = 1;
 
-      ctx.fillStyle="#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      // text
+      ctx.fillStyle=textColor; ctx.textAlign="center"; ctx.textBaseline="middle";
+      // 얇은 외곽선으로 배경과 분리
+      ctx.strokeStyle=(textColor==='#ffffff')?'rgba(0,0,0,.35)':'rgba(255,255,255,.35)'; 
+      ctx.lineWidth=2;
+
       let y = -((lines.length-1)/2)*lineH;
-      for(const ln of lines){ ctx.fillText(ln.t, radial, y); y += lineH; }
+      for(const ln of lines){
+        ctx.strokeText(ln.t, radial, y);
+        ctx.fillText(ln.t, radial, y);
+        y += lineH;
+      }
       ctx.restore();
     }
   }else{
     ctx.beginPath(); ctx.arc(0,0,R,0,TWO_PI); ctx.fillStyle='#3b4a9e'; ctx.fill();
   }
+  // hub
   ctx.beginPath(); ctx.arc(0,0,80,0,TWO_PI);
   const g=ctx.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#7bd3ff'); g.addColorStop(1,'#0b76d1'); ctx.fillStyle=g; ctx.fill();
   ctx.beginPath(); ctx.arc(0,0,90,0,TWO_PI); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=10; ctx.stroke();
@@ -310,7 +355,7 @@ function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arc
 /* text fitting with auto font downsize + ellipsis */
 function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){
   let size=basePx;
-  const words = text.split(/\s+/);
+  const words = (text||'').split(/\s+/);
   while(size>=minPx){
     ctx.font = `700 ${size}px ui-sans-serif,system-ui,'Noto Sans KR'`;
     const lines=[]; let line='', w=0;
@@ -386,9 +431,9 @@ function onWin(idx){
 
 /* ===== Modal ===== */
 function openModal(question, answer){
-  mQ.innerHTML = escapeHtml(question);
-  if(answer){ mA.innerHTML = escapeHtml(answer); mA.style.display='none'; btnReveal.textContent='정답 보기'; btnReveal.style.display='inline-flex'; }
-  else{ mA.innerHTML='(정답 미입력)'; mA.style.display='none'; btnReveal.textContent='정답 없음'; btnReveal.style.display='inline-flex'; }
+  mQ.innerHTML = escapeHtml(question||'(항목 없음)');
+  if(answer){ mA.innerHTML = escapeHtml(answer); mA.style.display='none'; btnReveal.textContent='정답 보기'; btnReveal.disabled=false; }
+  else{ mA.innerHTML='(정답 미입력)'; mA.style.display='none'; btnReveal.textContent='정답 없음'; btnReveal.disabled=true; }
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
 }
@@ -397,6 +442,7 @@ function closeModal(){
   modal.setAttribute('aria-hidden','true');
 }
 btnReveal.addEventListener('click', ()=>{
+  if(btnReveal.disabled) return;
   if(mA.style.display==='none'){ mA.style.display='block'; btnReveal.textContent='정답 숨기기'; }
   else{ mA.style.display='none'; btnReveal.textContent='정답 보기'; }
 });
@@ -434,7 +480,7 @@ function hideEditor(){ hide(editorWrap); }
 itemTable.addEventListener('input', e=>{
   const t=e.target;
   if(t.classList.contains('ipt-label')){ items[+t.dataset.k].label=t.value; rebuildSegments(); }
-  if(t.classList.contains('ipt-answer')){ items[+t.dataset.k].answer=t.value; /* wheel text는 label만 */ }
+  if(t.classList.contains('ipt-answer')){ items[+t.dataset.k].answer=t.value; }
   if(t.classList.contains('ipt-weight')){ items[+t.dataset.k].weight=(t.value===''?null:Number(t.value)); rebuildSegments(); }
 });
 itemTable.addEventListener('click', e=>{
@@ -478,12 +524,12 @@ function parseTXT(s){
   });
 }
 function parseCSV(s){
-  // columns: question,answer,weight (header 한글/영문 지원)
+  // columns: question/label,answer,weight (header 한글/영문 지원)
   const lines=s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean), out=[];
   let header=null;
   if(lines.length){
     const h=lines[0].split(',').map(x=>x.trim().toLowerCase());
-    if(h.includes('question')||h.includes('문항')||h.includes('label')){
+    if(h.includes('question')||h.includes('문항')||h.includes('label')||h.includes('항목')){
       header=h; lines.shift();
     }
   }
@@ -496,14 +542,14 @@ function parseCSV(s){
   return out;
 }
 qs('btnDownloadSamples').addEventListener('click', ()=>{
-  const txt=`지구에서 가장 큰 바다는? || 태평양
-봄의 특징 세 가지를 말해보세요
-우리 학교 이름은? || ○○초등학교`;
-  const csv=`question,answer,weight
-1+1은?,2,40
-가을의 특징은?,낙엽/수확,
-수도는 어디일까요?,서울,30`;
-  download('quiz-sample.txt',txt,'text/plain;charset=utf-8'); download('quiz-sample.csv',csv,'text/csv;charset=utf-8');
+  const txt=`가위바위보 대표 뽑기
+청소구역 정하기 || 복도
+오늘의 발표자 || 1조`;
+  const csv=`label,answer,weight
+간식 당번,,
+자리 바꾸기(앞줄),,40
+체육 모둠장,,"`;
+  download('sample.txt',txt,'text/plain;charset=utf-8'); download('sample.csv',csv,'text/csv;charset=utf-8');
 });
 function download(name,content,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
 
@@ -515,10 +561,10 @@ qs('btnBig').addEventListener('click', ()=>{
   w.document.write(bigHtml(document.documentElement.getAttribute('data-theme')||'dark', items, allowDuplicate, angle)); w.document.close();
 });
 
-/* ===== Big screen (동일 팝업/정답 보기 포함) ===== */
+/* ===== Big screen (같은 기능/시인성) ===== */
 function bigHtml(theme, itemsInit, dupe, ang){
   return `<!DOCTYPE html><html lang="ko" data-theme="${theme}"><head><meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 퀴즈 룰렛</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 룰렛</title>
 <style>
 :root{--bg:#0a0d1f;--tx:#fff;--acc:#3aa7ff;--acc2:#0b76d1} html[data-theme="light"]{--bg:#f6f7fb;--tx:#101322;--acc:#2b7bff;--acc2:#2359cf}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:ui-sans-serif,system-ui,'Noto Sans KR',sans-serif}
@@ -539,8 +585,8 @@ html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1
 .card .q{white-space:pre-wrap;font-weight:900;font-size:44px;line-height:1.35}
 .card .a{white-space:pre-wrap;margin-top:14px;padding:14px;border-radius:12px;background:#0b1139a6;border:1px solid #3b4bd466;font-size:32px;display:none}
 .card .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-.pill{padding:12px 16px;border-radius:12px;border:1px solid #3a47b8aa;background:#1a1f42d9;cursor:pointer;font-weight:800}
-.pill.primary{background:linear-gradient(180deg,var(--acc),var(--acc2));border-color:#5aa6ff}
+.pill{padding:14px 18px;border-radius:12px;border:2px solid #6aa8ff;background:linear-gradient(180deg,var(--acc),var(--acc2));cursor:pointer;color:#fff;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 20px rgba(58,120,255,.28)}
+.pill.secondary{background:#1a1f42d9;border-color:#3a47b8aa}
 </style></head><body>
 <div class="controls"><button class="btn" id="start">▶ 시작</button><button class="btn" id="reset">↺ 초기화</button></div>
 <div class="stage">
@@ -550,12 +596,12 @@ html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1
 <div id="modal" class="modal" aria-hidden="true">
   <div class="backdrop"></div>
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-    <h3 id="mTitle">당첨 문항</h3>
+    <h3 id="mTitle">당첨</h3>
     <div id="mQuestion" class="q"></div>
     <div id="mAnswer" class="a"></div>
     <div class="actions">
       <button id="btnReveal" class="pill">정답 보기</button>
-      <button id="btnClose" class="pill primary">닫기</button>
+      <button id="btnClose" class="pill secondary">닫기</button>
     </div>
   </div>
 </div>
@@ -564,69 +610,59 @@ const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
 const C=document.getElementById('C'), X=C.getContext('2d');
 let items=${JSON.stringify([])}; items=${JSON.stringify(items)}; // 초기값 전달
 let allow=${allowDuplicate?'true':'false'}, angle=${angle||0}, spinning=false, seg=[];
+function hslToRgb(h,s,l){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;
+ if(0<=h && h<60){r=c;g=x;b=0;} else if(60<=h && h<120){r=x;g=c;b=0;} else if(120<=h && h<180){r=0;g=c;b=x;}
+ else if(180<=h && h<240){r=0;g=x;b=c;} else if(240<=h && h<300){r=x;g=0;b=c;} else {r=c;g=0;b=x;}
+ return [(r+m)*255,(g+m)*255,(b+m)*255];}
+function lum(r,g,b){const a=[r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2];}
+function txtColor(h){const [r,g,b]=hslToRgb(h,.75,.52);return (lum(r,g,b)>0.5)?'#0b0f1c':'#fff';}
 function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
-function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){
-  let size=basePx, words=text.split(/\\s+/);
-  while(size>=minPx){
-    ctx.font=\`700 \${size}px ui-sans-serif,'Noto Sans KR'\`;
-    const lines=[]; let line='', w=0;
-    for(let i=0;i<words.length;i++){
-      const t=line?line+' '+words[i]:words[i], m=ctx.measureText(t).width;
-      if(m<=maxW){ line=t; w=m; } else { if(line) lines.push({t:line,w}); else lines.push({t:words[i],w:m}); line=''; w=0; i--; }
-      if(lines.length===maxLines) break;
-    }
-    if(line&&lines.length<maxLines) lines.push({t:line,w:ctx.measureText(line).width});
-    if(lines.length<=maxLines && Math.max(...lines.map(o=>o.w))<=maxW) return lines;
-    size-=2;
+function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){ let size=basePx, words=(text||'').split(/\\s+/);
+ while(size>=minPx){ ctx.font=\`700 \${size}px ui-sans-serif,'Noto Sans KR'\`; const lines=[]; let line='', w=0;
+  for(let i=0;i<words.length;i++){ const t=line?line+' '+words[i]:words[i], m=ctx.measureText(t).width;
+   if(m<=maxW){ line=t; w=m; } else { if(line) lines.push({t:line,w}); else lines.push({t:words[i],w:m}); line=''; w=0; i--; } if(lines.length===maxLines) break; }
+  if(line&&lines.length<maxLines) lines.push({t:line,w:ctx.measureText(line).width});
+  if(lines.length<=maxLines && Math.max(...lines.map(o=>o.w))<=maxW) return lines; size-=2;
+ } ctx.font=\`700 \${minPx}px ui-sans-serif,'Noto Sans KR'\`; const ell='…', res=[]; let line='', w=0;
+ for(const word of (text||'').split(/\\s+/)){ const t=line?line+' '+word:word, m=ctx.measureText(t).width;
+  if(m<=maxW){ line=t; w=m; } else { if(res.length===maxLines-1){ let cut=line; while(ctx.measureText(cut+ell).width>maxW && cut.length>0) cut=cut.slice(0,-1); res.push({t:cut+ell,w:ctx.measureText(cut+ell).width}); return res; }
+   res.push({t:line,w}); line=word; w=ctx.measureText(word).width; } }
+ if(line&&res.length<maxLines) res.push({t:line,w:ctx.measureText(line).width}); return res; }
+function rebuild(){ let n=items.length, wArr=new Array(n).fill(0), uns=[], sum=0;
+ for(let i=0;i<n;i++){ const w=Number(items[i].weight); if(!isNaN(w)&&w>0){wArr[i]=w; sum+=w;} else uns.push(i); }
+ if(n===0){ seg=[]; draw(); return; }
+ if(sum===0){ for(let i=0;i<n;i++) wArr[i]=100/n; } else { const rem=Math.max(0,100-sum), sh=uns.length? rem/uns.length : 0; for(const i of uns) wArr[i]=sh; }
+ const S=wArr.reduce((a,b)=>a+b,0)||1, f=wArr.map(v=>v/S); seg=[]; let a=0;
+ for(let i=0;i<n;i++){ const st=a*TWO_PI,en=(a+f[i])*TWO_PI; seg.push({label:items[i].label,answer:items[i].answer,start:st,end:en,center:(st+en)/2}); a+=f[i]; }
+ draw(); }
+function draw(){ const W=C.width,H=C.height; X.clearRect(0,0,W,H); X.save(); X.translate(W/2,H/2); X.rotate(angle);
+ const R=Math.min(W,H)/2-36, rimO=R+26, rimI=R+6, innerW=R+2;
+ X.save(); X.shadowColor='rgba(0,0,0,.45)'; X.shadowBlur=18; X.beginPath(); X.arc(0,0,rimO,0,TWO_PI); X.fillStyle='#0a0c12'; X.fill(); X.restore();
+ X.globalCompositeOperation='destination-out'; X.beginPath(); X.arc(0,0,rimI,0,TWO_PI); X.fill(); X.globalCompositeOperation='source-over';
+ X.beginPath(); X.arc(0,0,innerW,0,TWO_PI); X.strokeStyle='rgba(255,255,255,.9)'; X.lineWidth=10; X.stroke();
+ for(let i=0;i<8;i++){ const a=i*(TWO_PI/8), r=(rimO+rimI)/2, x=Math.cos(a)*r, y=Math.sin(a)*r;
+  X.beginPath(); X.arc(x,y,8,0,TWO_PI); X.fillStyle='#e6e8ef'; X.fill();
+  X.beginPath(); X.arc(x,y,3.2,0,TWO_PI); X.fillStyle='#1b1e2a'; X.fill(); }
+ if(seg.length){
+  for(let i=0;i<seg.length;i++){
+    const s=seg[i], hue=Math.floor((360/seg.length)*i);
+    X.beginPath(); X.moveTo(0,0); X.arc(0,0,R,s.start,s.end); X.closePath();
+    X.fillStyle=\`hsl(\${hue} 75% 52%)\`; X.fill();
+    X.strokeStyle='rgba(5,10,30,.55)'; X.lineWidth=6; X.beginPath(); X.arc(0,0,R,s.start,s.end); X.stroke();
+    X.save(); X.rotate(s.center);
+    const radial=R*0.70, pad=Math.min((s.end-s.start)/2-0.05,0.5), maxArc=(s.end-s.start)-pad*2, maxW=Math.max(80, radial*maxArc);
+    const lines=wrapFit(X, s.label, maxW, 3, 44, 16);
+    const textColor=txtColor(hue);
+    const lh=parseInt(X.font,10)+6, boxW=Math.min(maxW, Math.max(...lines.map(m=>m.w))+28), boxH=lines.length*lh+16;
+    X.globalAlpha=0.22; roundedRect(X, radial-boxW/2, -boxH/2, boxW, boxH, 14); X.fillStyle=(textColor==='#fff')?'#000':'#fff'; X.fill(); X.globalAlpha=1;
+    X.fillStyle=textColor; X.textAlign='center'; X.textBaseline='middle';
+    X.strokeStyle=(textColor==='#fff')?'rgba(0,0,0,.35)':'rgba(255,255,255,.35)'; X.lineWidth=2;
+    let y=-((lines.length-1)/2)*lh; for(const ln of lines){ X.strokeText(ln.t, radial, y); X.fillText(ln.t, radial, y); y+=lh; }
+    X.restore();
   }
-  ctx.font=\`700 \${minPx}px ui-sans-serif,'Noto Sans KR'\`;
-  const res=[]; let line='', w=0; const ell='…';
-  for(const word of words){
-    const t=line?line+' '+word:word, m=ctx.measureText(t).width;
-    if(m<=maxW){ line=t; w=m; }
-    else{
-      if(res.length===maxLines-1){ let cut=line; while(ctx.measureText(cut+ell).width>maxW && cut.length>0) cut=cut.slice(0,-1); res.push({t:cut+ell,w:ctx.measureText(cut+ell).width}); return res; }
-      res.push({t:line,w}); line=word; w=ctx.measureText(word).width;
-    }
-  }
-  if(line&&res.length<maxLines) res.push({t:line,w:ctx.measureText(line).width}); return res;
-}
-function rebuild(){
-  let n=items.length, wArr=new Array(n).fill(0), uns=[], sum=0;
-  for(let i=0;i<n;i++){ const w=Number(items[i].weight); if(!isNaN(w)&&w>0){wArr[i]=w; sum+=w;} else uns.push(i); }
-  if(n===0){ seg=[]; draw(); return; }
-  if(sum===0){ for(let i=0;i<n;i++) wArr[i]=100/n; } else { const rem=Math.max(0,100-sum), sh=uns.length? rem/uns.length : 0; for(const i of uns) wArr[i]=sh; }
-  const S=wArr.reduce((a,b)=>a+b,0)||1, f=wArr.map(v=>v/S); seg=[]; let a=0;
-  for(let i=0;i<n;i++){ const st=a*TWO_PI,en=(a+f[i])*TWO_PI; seg.push({label:items[i].label,answer:items[i].answer,start:st,end:en,center:(st+en)/2}); a+=f[i]; }
-  draw();
-}
-function draw(){
-  const W=C.width,H=C.height; X.clearRect(0,0,W,H); X.save(); X.translate(W/2,H/2); X.rotate(angle);
-  const R=Math.min(W,H)/2-36, rimO=R+26, rimI=R+6, innerW=R+2;
-  X.save(); X.shadowColor='rgba(0,0,0,.45)'; X.shadowBlur=18; X.beginPath(); X.arc(0,0,rimO,0,TWO_PI); X.fillStyle='#0a0c12'; X.fill(); X.restore();
-  X.globalCompositeOperation='destination-out'; X.beginPath(); X.arc(0,0,rimI,0,TWO_PI); X.fill(); X.globalCompositeOperation='source-over';
-  X.beginPath(); X.arc(0,0,innerW,0,TWO_PI); X.strokeStyle='rgba(255,255,255,.9)'; X.lineWidth=10; X.stroke();
-  for(let i=0;i<8;i++){ const a=i*(TWO_PI/8), r=(rimO+rimI)/2, x=Math.cos(a)*r, y=Math.sin(a)*r;
-    X.beginPath(); X.arc(x,y,8,0,TWO_PI); X.fillStyle='#e6e8ef'; X.fill();
-    X.beginPath(); X.arc(x,y,3.2,0,TWO_PI); X.fillStyle='#1b1e2a'; X.fill();
-  }
-  if(seg.length){
-    for(let i=0;i<seg.length;i++){
-      const s=seg[i], hue=Math.floor((360/seg.length)*i);
-      X.beginPath(); X.moveTo(0,0); X.arc(0,0,R,s.start,s.end); X.closePath(); X.fillStyle=\`hsl(\${hue} 75% 52%)\`; X.fill();
-      X.strokeStyle='rgba(5,10,30,.55)'; X.lineWidth=6; X.beginPath(); X.arc(0,0,R,s.start,s.end); X.stroke();
-      X.save(); X.rotate(s.center);
-      const radial=R*0.70, pad=Math.min((s.end-s.start)/2-0.05,0.5), maxArc=(s.end-s.start)-pad*2, maxW=radial*maxArc;
-      const lines=wrapFit(X, s.label, maxW, 3, 44, 16);
-      const lh=parseInt(X.font,10)+6, boxW=Math.min(maxW, Math.max(...lines.map(m=>m.w))+24), boxH=lines.length*lh+14;
-      roundedRect(X, radial-boxW/2, -boxH/2, boxW, boxH, 14); X.fillStyle='rgba(4,7,22,.35)'; X.fill();
-      X.fillStyle='#fff'; X.textAlign='center'; X.textBaseline='middle';
-      let y=-((lines.length-1)/2)*lh; for(const ln of lines){ X.fillText(ln.t, radial, y); y+=lh; }
-      X.restore();
-    }
-  } else { X.beginPath(); X.arc(0,0,R,0,TWO_PI); X.fillStyle='#3b4a9e'; X.fill(); }
-  X.beginPath(); X.arc(0,0,80,0,TWO_PI); const g=X.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#7bd3ff'); g.addColorStop(1,'#0b76d1'); X.fillStyle=g; X.fill();
-  X.beginPath(); X.arc(0,0,90,0,TWO_PI); X.strokeStyle='rgba(255,255,255,.9)'; X.lineWidth=10; X.stroke(); X.restore();
+ } else { X.beginPath(); X.arc(0,0,R,0,TWO_PI); X.fillStyle='#3b4a9e'; X.fill(); }
+ X.beginPath(); X.arc(0,0,80,0,TWO_PI); const g=X.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#7bd3ff'); g.addColorStop(1,'#0b76d1'); X.fillStyle=g; X.fill();
+ X.beginPath(); X.arc(0,0,90,0,TWO_PI); X.strokeStyle='rgba(255,255,255,.9)'; X.lineWidth=10; X.stroke(); X.restore();
 }
 function normAngle(a){return (a%TWO_PI+TWO_PI)%TWO_PI}
 function pick(){ const tot=seg.reduce((a,s)=>a+(s.end-s.start),0); let r=Math.random()*tot, acc=0; for(let i=0;i<seg.length;i++){const len=seg[i].end-seg[i].start; if(r<acc+len) return i; acc+=len;} return seg.length-1;}
@@ -638,9 +674,9 @@ function spin(){ if(spinning||seg.length===0) return; closeModal(); spinning=tru
 document.getElementById('start').onclick=spin; document.getElementById('reset').onclick=()=>{ angle=0; draw(); closeModal(); };
 
 const modal=document.getElementById('modal'), mQ=document.getElementById('mQuestion'), mA=document.getElementById('mAnswer'), btnReveal=document.getElementById('btnReveal'), btnClose=document.getElementById('btnClose');
-function openModal(q,a){ mQ.textContent=q; mA.textContent=a||'(정답 미입력)'; mA.style.display='none'; btnReveal.textContent = a? '정답 보기':'정답 없음'; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); }
+function openModal(q,a){ mQ.textContent=q||'(항목 없음)'; mA.textContent=a||'(정답 미입력)'; mA.style.display=a?'none':'none'; btnReveal.textContent = a? '정답 보기':'정답 없음'; btnReveal.disabled = !a; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); }
 function closeModal(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
-btnReveal.addEventListener('click', ()=>{ if(mA.style.display==='none'){ mA.style.display='block'; btnReveal.textContent='정답 숨기기'; } else { mA.style.display='none'; btnReveal.textContent='정답 보기'; } });
+btnReveal.addEventListener('click', ()=>{ if(btnReveal.disabled) return; if(mA.style.display==='none'){ mA.style.display='block'; btnReveal.textContent='정답 숨기기'; } else { mA.style.display='none'; btnReveal.textContent='정답 보기'; } });
 btnClose.addEventListener('click', closeModal); modal.querySelector('.backdrop').addEventListener('click', closeModal); document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 rebuild();
