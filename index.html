@@ -142,8 +142,8 @@
         <div class="help">
           <b>입력방법</b><br>
           • 한 줄 = 한 항목<br>
-          • 정답/부가정보가 있으면 <b>항목 // 정답</b> 형태로 입력 (예: <i>호주의 수도는? // 캔버라</i>)<br>
-          • CSV는 <code>label,answer,weight</code> 형식, TXT는 줄마다 항목 또는 <code>항목 // 정답</code>
+          • 정답/부가정보가 있으면 <b>항목 // 정답</b> 형태(예: <i>호주의 수도는? // 캔버라</i>) — <small>기존 <code>||</code>도 호환</small><br>
+          • CSV: <code>label,answer,weight</code> · TXT: 줄마다 항목 또는 <code>항목 // 정답</code>
         </div>
 
         <!-- 편집 테이블 -->
@@ -203,6 +203,7 @@ const qs=id=>document.getElementById(id);
 const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmtTime=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
 const show=el=>el.classList.remove('hidden'); const hide=el=>el.classList.add('hidden'); const toggle=el=>el.classList.toggle('hidden');
+// 폰트 px 추출(텍스트 미표시 원인 해결)
 const getFontPx = (ctx) => { const m = ctx.font.match(/(\d+(?:\.\d+)?)px/); return m ? Number(m[1]) : 16; };
 
 /* ===== State ===== */
@@ -222,12 +223,11 @@ const modal=qs('modal'), mQ=qs('mQuestion'), mA=qs('mAnswer'), btnReveal=qs('btn
 function autosize(el){ el.style.height="auto"; el.style.height=Math.min(el.scrollHeight,180)+"px"; }
 ta.addEventListener('input', ()=>autosize(ta)); autosize(ta);
 
-/* ===== Input add ===== */
+/* ===== 입력 추가 ===== */
 let composing=false;
 ta.addEventListener('compositionstart',()=>{composing=true;});
 ta.addEventListener('compositionend',()=>{composing=false;});
 function splitLabelAnswer(v){
-  // 우선순위: // → || (둘 다 인식)
   if(v.includes('//')){ const [q,a]=v.split('//'); return [q.trim(), (a||'').trim()]; }
   if(v.includes('||')){ const [q,a]=v.split('||'); return [q.trim(), (a||'').trim()]; }
   return [v.trim(), ""];
@@ -245,7 +245,7 @@ ta.addEventListener('keydown', e=>{
   if(e.key==='Enter' && !e.shiftKey && !e.isComposing && !composing){ e.preventDefault(); addFromTextarea(); }
 });
 
-/* ===== Build segments ===== */
+/* ===== 세그먼트 구성 ===== */
 function rebuildSegments(){
   if(items.length===0){ segments=[]; drawWheel(); return; }
   const n=items.length, weights=new Array(n).fill(0), unspecified=[];
@@ -268,7 +268,7 @@ function rebuildSegments(){
   drawWheel();
 }
 
-/* ===== Color utils for contrast ===== */
+/* ===== 대비 색 계산 ===== */
 function hslToRgb(h,s,l){
   const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
   let r=0,g=0,b=0;
@@ -290,7 +290,7 @@ function bestTextColorForHSL(h, sPct=75, lPct=52){
   return (L>0.5)? '#0b0f1c' : '#ffffff';
 }
 
-/* ===== Draw wheel (text-fit + auto-contrast) ===== */
+/* ===== 룰렛 그리기 ===== */
 function drawWheel(){
   const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
@@ -298,7 +298,7 @@ function drawWheel(){
   const R=Math.min(W,H)/2-36;
   const rimO=R+26,rimI=R+6, innerW=R+2;
 
-  // rim & bolts
+  // Rim & 볼트
   ctx.save(); ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=18;
   ctx.beginPath(); ctx.arc(0,0,rimO,0,TWO_PI); ctx.fillStyle='#0a0c12'; ctx.fill(); ctx.restore();
   ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(0,0,rimI,0,TWO_PI); ctx.fill();
@@ -313,13 +313,13 @@ function drawWheel(){
   if(segments.length){
     for(let i=0;i<segments.length;i++){
       const s=segments[i], hue=Math.floor((360/segments.length)*i);
-      // slice
+
+      // 조각
       ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,s.start,s.end); ctx.closePath();
-      const fill = `hsl(${hue} 75% 52%)`;
-      ctx.fillStyle=fill; ctx.fill();
+      ctx.fillStyle=`hsl(${hue} 75% 52%)`; ctx.fill();
       ctx.strokeStyle="rgba(5,10,30,.6)"; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,0,R,s.start,s.end); ctx.stroke();
 
-      // text region
+      // 텍스트 박스 + 텍스트
       ctx.save(); ctx.rotate(s.center);
       const radial = R*0.70;
       const padAng = Math.min( (s.end-s.start)/2 - 0.05, 0.5 );
@@ -328,7 +328,6 @@ function drawWheel(){
       const lines = wrapFit(ctx, s.label, maxWidth, 3, 28, 14);
 
       const textColor = bestTextColorForHSL(hue,75,52);
-
       const fs = getFontPx(ctx);
       const lineH = fs + 6;
 
@@ -355,7 +354,7 @@ function drawWheel(){
   }else{
     ctx.beginPath(); ctx.arc(0,0,R,0,TWO_PI); ctx.fillStyle='#3b4a9e'; ctx.fill();
   }
-  // hub
+  // 허브
   ctx.beginPath(); ctx.arc(0,0,80,0,TWO_PI);
   const g=ctx.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#7bd3ff'); g.addColorStop(1,'#0b76d1'); ctx.fillStyle=g; ctx.fill();
   ctx.beginPath(); ctx.arc(0,0,90,0,TWO_PI); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=10; ctx.stroke();
@@ -363,7 +362,7 @@ function drawWheel(){
 }
 function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
-/* text fitting with auto font downsize + ellipsis */
+/* 텍스트 자동 줄맞춤 */
 function wrapFit(ctx, text, maxW, maxLines, basePx, minPx){
   let size=basePx;
   const words = (text||'').split(/\s+/);
@@ -468,7 +467,7 @@ function renderEditor(){
       <td class="td-weight"><input data-k="${i}" class="ipt-weight" type="number" min="0" step="0.1" placeholder="-" value="${o.weight??''}"/></td>
       <td class="td-actions">
         <button class="icon-btn btn-del" title="삭제" data-k="${i}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M3 6h18M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2m1 0l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="#d7dcff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M10 11v6M14 11v6" stroke="#d7dcff" stroke-width="2" stroke-linecap="round"/>
           </svg>
@@ -540,7 +539,7 @@ function parseCSV(s){
     const [a,b,c]=(line.split(',')||[]).map(x=>x?.trim());
     const q=a||''; const an=b||''; const w=(c==null||c==='')? null : Number(c);
     if(!q) continue;
-    out.push({label:q, answer:an, weight=isNaN(w)? null : w});
+    out.push({label:q, answer:an, weight:isNaN(w)? null : w});
   }
   return out;
 }
@@ -561,11 +560,14 @@ qs('btnReset').addEventListener('click', ()=>{ angle=0; closeModal(); drawWheel(
 qs('btnCenterStart').addEventListener('click', spin);
 qs('btnBig').addEventListener('click', ()=>{
   const w = window.open('', '_blank', 'width=1200,height=1000');
-  w.document.write(bigHtml(document.documentElement.getAttribute('data-theme')||'dark', items, allowDuplicate, angle)); w.document.close();
+  // 안전: 템플릿 내부 변수 정확 전달
+  w.document.write(bigHtml(document.documentElement.getAttribute('data-theme')||'dark', items, allowDuplicate, angle)); 
+  w.document.close();
 });
 
-/* ===== Big screen (가운데 시작 버튼 적용) ===== */
+/* ===== 대형 화면 템플릿 ===== */
 function bigHtml(theme, itemsInit, dupe, ang){
+  const payload = encodeURIComponent(JSON.stringify({items:itemsInit,dupe,ang,theme}));
   return `<!DOCTYPE html><html lang="ko" data-theme="${theme}"><head><meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 룰렛</title>
 <style>
@@ -614,8 +616,8 @@ html[data-theme="light"] .btn{background:#ffffffdd;border-color:#c9d1ff;color:#1
 const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
 const C=document.getElementById('C'), X=C.getContext('2d');
 const getFontPx=(ctx)=>{const m=ctx.font.match(/(\\d+(?:\\.\\d+)?)px/);return m?Number(m[1]):16;}
-let items=${JSON.stringify([])}; items=${JSON.stringify(items)};
-let allow=${allowDuplicate?'true':'false'}, angle=${angle||0}, spinning=false, seg=[];
+const payload=JSON.parse(decodeURIComponent('${payload}'));
+let items=payload.items||[]; let allow=payload.dupe; let angle=payload.ang||0; let spinning=false, seg=[];
 function hslToRgb(h,s,l){const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;
  if(0<=h && h<60){r=c;g=x;b=0;} else if(60<=h && h<120){r=x;g=c;b=0;} else if(120<=h && h<180){r=0;g=c;b=x;}
  else if(180<=h && h<240){r=0;g=x;b=c;} else if(240<=h && h<300){r=x;g=0;b=c;} else {r=c;g=0;b=x;}
@@ -686,7 +688,6 @@ function spin(){ if(spinning||seg.length===0) return; const modal=document.getEl
    const idx=(getAtPointer()>=0)?getAtPointer():i; const pickLbl=seg[idx]; openModal(pickLbl.label, pickLbl.answer||''); if(!allow){ const k=items.findIndex(o=>o.label===pickLbl.label); if(k>=0) items.splice(k,1); rebuild(); } spinning=false; } })(t0); }
 document.getElementById('startCenter').onclick=spin;
 document.getElementById('reset').onclick=()=>{ angle=0; draw(); const m=document.getElementById('modal'); if(m) m.classList.remove('show'); };
-
 rebuild();
 <\/script></body></html>`;
 }
