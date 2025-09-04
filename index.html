@@ -1,109 +1,108 @@
 <!DOCTYPE html>
 <html lang="ko" data-theme="dark">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Roullet | 최종본</title>
-<style>
-  :root{
-    --bg-1:#0f1220; --bg-2:#171a2b; --panel:#1b2142cc;
-    --text:#e9ecf1; --muted:#9aa3b2;
-    --ghost-bg:#0e1435; --ghost-br:#2d3470;
-    --btn1:#2a33a8; --btn2:#1b2088; --btn-br:#4b57ff66;
-    --panel-line:#2a2f55; --section-bg:#12173180;
-    --ring:0 0 0 3px rgba(88,101,242,.28); --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
-    --input-bg:#0f1433; --input-br:#2f3566; --accent:#3aa7ff; --accent2:#0b76d1;
-  }
-  html[data-theme="light"]{
-    --bg-1:#f6f7fb; --bg-2:#eef1fb; --panel:#ffffffee;
-    --text:#101322; --muted:#4b5570;
-    --ghost-bg:#f3f5ff; --ghost-br:#c9d1ff;
-    --btn1:#4d5cff; --btn2:#3743d9; --btn-br:#4b57ff66;
-    --panel-line:#e2e7ff; --section-bg:#f7f8ff;
-    --input-bg:#ffffff; --input-br:#c9cfef; --accent:#2b7bff; --accent2:#2359cf;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--text);
-    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-    background:
-      radial-gradient(1200px 600px at 20% 0%, #1f294e33, transparent 60%),
-      radial-gradient(800px 600px at 100% 100%, #2a3a8a30, transparent 60%),
-      linear-gradient(180deg,var(--bg-1),var(--bg-2));
-  }
-  .wrap{display:grid;grid-template-columns:minmax(360px,1fr) 520px;gap:20px;height:100%;padding:20px}
-  .panel{background:var(--panel);backdrop-filter:blur(8px);border:1px solid var(--panel-line);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .left{position:relative;display:grid;grid-template-rows:auto 1fr;align-items:center;justify-items:center;padding:24px}
-  .title{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .title h1{font-size:18px;font-weight:800;margin:0;letter-spacing:.2px;opacity:.9}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Roullet | 분리 최종본</title>
+  <style>
+    :root{
+      --bg-1:#0f1220; --bg-2:#171a2b; --panel:#1b2142cc;
+      --text:#e9ecf1; --muted:#9aa3b2;
+      --ghost-bg:#0e1435; --ghost-br:#2d3470;
+      --btn1:#2a33a8; --btn2:#1b2088; --btn-br:#4b57ff66;
+      --panel-line:#2a2f55; --section-bg:#12173180;
+      --ring:0 0 0 3px rgba(88,101,242,.28); --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
+      --input-bg:#0f1433; --input-br:#2f3566; --accent:#3aa7ff; --accent2:#0b76d1;
+    }
+    html[data-theme="light"]{
+      --bg-1:#f6f7fb; --bg-2:#eef1fb; --panel:#ffffffee;
+      --text:#101322; --muted:#4b5570;
+      --ghost-bg:#f3f5ff; --ghost-br:#c9d1ff;
+      --btn1:#4d5cff; --btn2:#3743d9; --btn-br:#4b57ff66;
+      --panel-line:#e2e7ff; --section-bg:#f7f8ff;
+      --input-bg:#ffffff; --input-br:#c9cfef; --accent:#2b7bff; --accent2:#2359cf;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 0%, #1f294e33, transparent 60%),
+        radial-gradient(800px 600px at 100% 100%, #2a3a8a30, transparent 60%),
+        linear-gradient(180deg,var(--bg-1),var(--bg-2));
+    }
+    .wrap{display:grid;grid-template-columns:minmax(360px,1fr) 520px;gap:20px;height:100%;padding:20px}
+    .panel{background:var(--panel);backdrop-filter:blur(8px);border:1px solid var(--panel-line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .left{position:relative;display:grid;grid-template-rows:auto 1fr;align-items:center;justify-items:center;padding:24px}
+    .title{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .title h1{font-size:18px;font-weight:800;margin:0;letter-spacing:.2px;opacity:.9}
+    .canvas-box{position:relative;width:min(90vmin, 920px);aspect-ratio:1/1;display:grid;place-items:center}
+    canvas{width:100%;height:100%;z-index:10}
+    .pointer{position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+      width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:28px solid #ff5a5a;
+      filter:drop-shadow(0 10px 14px rgba(0,0,0,.45)); z-index:50;}
+    .center-start{
+      position:absolute; width:170px; height:170px; border-radius:50%;
+      display:grid; place-items:center; font-weight:900; font-size:22px; color:#fff;
+      background: radial-gradient(circle at 35% 30%, #7bd3ff, var(--accent) 60%, var(--accent2) 100%);
+      border:10px solid #fff; box-shadow:0 14px 24px rgba(0,0,0,.35); cursor:pointer; user-select:none; z-index:40;}
+    .center-start:disabled{ filter:grayscale(.4) brightness(.9); cursor:not-allowed; }
 
-  .canvas-box{position:relative;width:min(90vmin, 920px);aspect-ratio:1/1;display:grid;place-items:center}
-  canvas{width:100%;height:100%;z-index:10}
-  .pointer{position:absolute; top:-6px; left:50%; transform:translateX(-50%);
-    width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:28px solid #ff5a5a;
-    filter:drop-shadow(0 10px 14px rgba(0,0,0,.45)); z-index:50;}
-  .center-start{
-    position:absolute; width:170px; height:170px; border-radius:50%;
-    display:grid; place-items:center; font-weight:900; font-size:22px; color:#fff;
-    background: radial-gradient(circle at 35% 30%, #7bd3ff, var(--accent) 60%, var(--accent2) 100%);
-    border:10px solid #fff; box-shadow:0 14px 24px rgba(0,0,0,.35); cursor:pointer; user-select:none; z-index:40;}
-  .center-start:disabled{ filter:grayscale(.4) brightness(.9); cursor:not-allowed; }
+    .right{display:flex;flex-direction:column;padding:18px;gap:14px}
+    .section{padding:14px;border-radius:12px;background:var(--section-bg);border:1px solid var(--panel-line)}
+    .section h2{font-size:14px;font-weight:800;letter-spacing:.4px;margin:0 0 10px 0;color:#7c8bff;text-transform:uppercase}
 
-  .right{display:flex;flex-direction:column;padding:18px;gap:14px}
-  .section{padding:14px;border-radius:12px;background:var(--section-bg);border:1px solid var(--panel-line)}
-  .section h2{font-size:14px;font-weight:800;letter-spacing:.4px;margin:0 0 10px 0;color:#7c8bff;text-transform:uppercase}
+    .input-row{display:flex;gap:10px;align-items:flex-start}
+    .ta{flex:1;min-height:48px;max-height:180px;overflow:auto;resize:none;
+        padding:12px 14px;border-radius:12px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);
+        outline:none;transition:box-shadow .15s,border-color .15s;font-size:15px;line-height:1.4}
+    .ta::placeholder{color:var(--muted)} .ta:focus{box-shadow:var(--ring);border-color:#7c8bff}
 
-  .input-row{display:flex;gap:10px;align-items:flex-start}
-  .ta{flex:1;min-height:48px;max-height:180px;overflow:auto;resize:none;
-      padding:12px 14px;border-radius:12px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);
-      outline:none;transition:box-shadow .15s,border-color .15s;font-size:15px;line-height:1.4}
-  .ta::placeholder{color:var(--muted)} .ta:focus{box-shadow:var(--ring);border-color:#7c8bff}
+    .btn{all:unset;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;cursor:pointer;
+        color:#fff;font-weight:800;font-size:14px;background:var(--ghost-bg);border:1px solid var(--ghost-br);transition:transform .08s,filter .2s}
+    .btn:active{transform:translateY(1px)} .btn:hover{filter:brightness(1.05)}
+    .btn-primary{background:linear-gradient(180deg,var(--btn1),var(--btn2));border:1px solid var(--btn-br);box-shadow:0 10px 20px rgba(37,48,140,.35)}
+    .btn-s{padding:8px 10px;font-size:12.5px;border-radius:10px}
 
-  .btn{all:unset;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;cursor:pointer;
-       color:#fff;font-weight:800;font-size:14px;background:var(--ghost-bg);border:1px solid var(--ghost-br);transition:transform .08s,filter .2s}
-  .btn:active{transform:translateY(1px)} .btn:hover{filter:brightness(1.05)}
-  .btn-primary{background:linear-gradient(180deg,var(--btn1),var(--btn2));border:1px solid var(--btn-br);box-shadow:0 10px 20px rgba(37,48,140,.35)}
-  .btn-s{padding:8px 10px;font-size:12.5px;border-radius:10px}
+    .row-3{display:flex;gap:10px;align-items:center;margin-top:8px}
 
-  .row-3{display:flex;gap:10px;align-items:center;margin-top:8px}
+    .table{border:1px solid var(--panel-line);border-radius:12px;padding:10px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.02))}
+    table{width:100%;border-collapse:separate;border-spacing:0 2px}
+    th,td{padding:4px 6px;font-size:14px}
+    th{color:var(--muted);font-weight:700}
+    .td-index{width:30px;color:var(--muted);text-align:right;padding-right:6px}
+    .td-label input, .td-answer input{width:100%;padding:7px 9px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text)}
+    .td-weight input{width:80px;padding:7px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);text-align:right}
+    .td-actions{width:40px;text-align:right}
+    .icon-btn{all:unset;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;border:1px solid var(--ghost-br);background:var(--ghost-bg);cursor:pointer}
+    .icon-btn:hover{filter:brightness(1.05)}
+    .toolbar{display:flex;gap:8px;justify-content:flex-end;margin:-2px 0 8px}
 
-  .table{border:1px solid var(--panel-line);border-radius:12px;padding:10px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.02))}
-  table{width:100%;border-collapse:separate;border-spacing:0 2px}
-  th,td{padding:4px 6px;font-size:14px}
-  th{color:var(--muted);font-weight:700}
-  .td-index{width:30px;color:var(--muted);text-align:right;padding-right:6px}
-  .td-label input, .td-answer input{width:100%;padding:7px 9px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text)}
-  .td-weight input{width:80px;padding:7px;border-radius:10px;border:1px solid var(--input-br);background:var(--input-bg);color:var(--text);text-align:right}
-  .td-actions{width:40px;text-align:right}
-  .icon-btn{all:unset;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;border:1px solid var(--ghost-br);background:var(--ghost-bg);cursor:pointer}
-  .icon-btn:hover{filter:brightness(1.05)}
-  .toolbar{display:flex;gap:8px;justify-content:flex-end;margin:-2px 0 8px}
+    .help{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px dashed var(--panel-line);color:var(--muted);font-size:13px;line-height:1.6}
 
-  .help{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px dashed var(--panel-line);color:var(--muted);font-size:13px;line-height:1.6}
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
+    .modal.show{display:flex}
+    .backdrop{position:absolute;inset:0;background:rgba(5,8,25,.6);backdrop-filter:blur(3px)}
+    .card{position:relative;max-width:min(86vw,880px);min-width:min(70vw,560px);background:linear-gradient(180deg,#121633,#0c0f24);
+          color:#fff;border:1px solid #3a47b8aa;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);padding:22px 22px 18px}
+    .card h3{margin:0 0 6px 0;font-size:18px;letter-spacing:.3px;color:#9fb0ff}
+    .card .q{white-space:pre-wrap;font-weight:900;font-size:28px;line-height:1.35}
+    .card .a{white-space:pre-wrap;margin-top:12px;padding:12px;border-radius:12px;background:#0b1139a6;border:1px solid #3b4bd466;font-size:22px;display:none}
+    .card .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .pill{padding:12px 16px;border-radius:12px;border:2px solid #6aa8ff;background:linear-gradient(180deg,var(--accent),var(--accent2));cursor:pointer;
+          color:#fff;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 20px rgba(58,120,255,.28)}
+    .pill.secondary{background:#1a1f42d9;border-color:#3a47b8aa}
+    .pill:active{transform:translateY(1px)}
 
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
-  .modal.show{display:flex}
-  .backdrop{position:absolute;inset:0;background:rgba(5,8,25,.6);backdrop-filter:blur(3px)}
-  .card{position:relative;max-width:min(86vw,880px);min-width:min(70vw,560px);background:linear-gradient(180deg,#121633,#0c0f24);
-        color:#fff;border:1px solid #3a47b8aa;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);padding:22px 22px 18px}
-  .card h3{margin:0 0 6px 0;font-size:18px;letter-spacing:.3px;color:#9fb0ff}
-  .card .q{white-space:pre-wrap;font-weight:900;font-size:28px;line-height:1.35}
-  .card .a{white-space:pre-wrap;margin-top:12px;padding:12px;border-radius:12px;background:#0b1139a6;border:1px solid #3b4bd466;font-size:22px;display:none}
-  .card .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-  .pill{padding:12px 16px;border-radius:12px;border:2px solid #6aa8ff;background:linear-gradient(180deg,var(--accent),var(--accent2));cursor:pointer;
-        color:#fff;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 20px rgba(58,120,255,.28)}
-  .pill.secondary{background:#1a1f42d9;border-color:#3a47b8aa}
-  .pill:active{transform:translateY(1px)}
+    .opt-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .opt-row .group{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.03);padding:8px 10px;border-radius:10px;border:1px solid var(--panel-line)}
+    .opt-row label{font-size:13px;color:var(--muted)}
+    .opt-row input[type="range"]{width:140px}
 
-  .opt-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  .opt-row .group{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.03);padding:8px 10px;border-radius:10px;border:1px solid var(--panel-line)}
-  .opt-row label{font-size:13px;color:var(--muted)}
-  .opt-row input[type="range"]{width:140px}
-
-  .hidden{display:none !important}
-  @media (max-width:980px){.wrap{grid-template-columns:1fr}.card{min-width:88vw}}
-</style>
+    .hidden{display:none !important}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}.card{min-width:88vw}}
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -178,7 +177,6 @@
         <label style="display:flex;align-items:center;gap:10px;margin-top:6px">
           <input id="chkTheme" type="checkbox" /> 밝은(프로젝터) 모드
         </label>
-
         <div class="opt-row" style="margin-top:10px">
           <div class="group">
             <label for="rngVol">볼륨</label>
@@ -208,380 +206,7 @@
     </div>
   </div>
 
-<script>
-(() => { "use strict";
-
-/* ===== DOMContentLoaded 이후에만 초기화 ===== */
-window.addEventListener('DOMContentLoaded', init);
-
-/* ===== 상수/유틸 ===== */
-const TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2;
-const qs=id=>document.getElementById(id);
-const show=el=>el.classList.remove('hidden'), hide=el=>el.classList.add('hidden'), toggle=el=>el.classList.toggle('hidden');
-const esc=s=>(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-const norm=a=> (a%TWO_PI + TWO_PI)%TWO_PI;
-const nowstr=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
-
-/* ===== 상태 ===== */
-let items=[];           // {label, answer, weight}
-let segments=[];        // 계산된 조각
-let allowDuplicate=true;
-let angle=0, spinning=false;
-const historyLog=[];
-let composing=false;    // IME 조합 상태
-let lastTick=-1;
-
-/* ===== SFX ===== */
-const SFX = (()=>{
-  let set='quiet', vol=0.7, mute=false;
-  const map={
-    quiet:{start:'assets/sfx/quiet/start_soft.mp3', tick:'assets/sfx/quiet/tick_soft.mp3', win:'assets/sfx/quiet/win_soft.mp3', click:'assets/sfx/quiet/ui_click.mp3'},
-    hype :{start:'assets/sfx/hype/start_hype.mp3',  tick:'assets/sfx/hype/tick_hype.mp3',  win:'assets/sfx/hype/win_hype.mp3',  click:'assets/sfx/hype/ui_click.mp3'}
-  };
-  const cache={};
-  function ensure(name){
-    if(!cache[name]) cache[name]={};
-    for(const k of Object.keys(map[name])){
-      if(!cache[name][k]){ cache[name][k]=new Audio(map[name][k]); cache[name][k].preload='auto'; }
-    }
-  }
-  ensure('quiet');
-  return {
-    setSet:v=>{ if(map[v]) { set=v; ensure(v);} },
-    setVol:v=>{ vol=Math.max(0,Math.min(1,v)); },
-    setMute:m=>{ mute=!!m; },
-    play:id=>{ if(mute) return; ensure(set); const base=(cache[set]||{})[id]; if(!base) return; const a=base.cloneNode(); a.volume=vol; a.play().catch(()=>{}); }
-  };
-})();
-
-/* ===== DOM 캐시 ===== */
-let canvas, ctx, ta, editorWrap, itemTable, logBox, fileInputEl, modal, mQ, mA;
-
-/* ===== 초기화 ===== */
-function init(){
-  // 요소
-  canvas=qs('wheel'); ctx=canvas.getContext('2d');
-  ta=qs('quizInput'); editorWrap=qs('editorWrap'); itemTable=qs('itemTable');
-  logBox=qs('logBox'); fileInputEl=qs('fileInput'); modal=qs('modal');
-  mQ=qs('mQuestion'); mA=qs('mAnswer');
-
-  // 버튼
-  qs('btnAdd').addEventListener('click', addFromTextarea);
-  qs('btnCenterStart').addEventListener('click', spin);
-  qs('btnReset').addEventListener('click', ()=>{ angle=0; drawWheel(); });
-  qs('btnBig').addEventListener('click', openBig);
-  qs('btnToggleList').addEventListener('click', ()=>{ if(editorWrap.classList.contains('hidden')) renderEditor(); toggle(editorWrap); });
-  qs('btnSave').addEventListener('click', ()=>{ syncEditor(); rebuildSegments(); hide(editorWrap); alert('저장 완료'); });
-  qs('btnClearWeight').addEventListener('click', ()=>{ items.forEach(o=>o.weight=null); renderEditor(); rebuildSegments(); });
-  qs('btnToggleLog').addEventListener('click', ()=>{ toggle(logBox); renderLog(); });
-  qs('btnClearLog').addEventListener('click', ()=>{ historyLog.length=0; renderLog(); });
-  qs('btnLoadFile').addEventListener('click', ()=> fileInputEl.click());
-  fileInputEl.addEventListener('change', onFilePicked);
-  qs('btnDownloadSamples').addEventListener('click', downloadSamples);
-
-  // 옵션
-  qs('chkDupe').addEventListener('change', e=> allowDuplicate=e.target.checked);
-  qs('chkTheme').addEventListener('change', e=> document.documentElement.setAttribute('data-theme', e.target.checked ? 'light' : 'dark'));
-  qs('rngVol').addEventListener('input', e=> SFX.setVol(e.target.value/100));
-  qs('chkMute').addEventListener('change', e=> SFX.setMute(e.target.checked));
-  document.querySelectorAll('input[name="sfxSet"]').forEach(r=> r.addEventListener('change', e=> SFX.setSet(e.target.value)));
-
-  // 입력창: 자동높이 + IME 감지 + 엔터 처리
-  autosize(ta);
-  ta.addEventListener('compositionstart',()=>{composing=true;});
-  ta.addEventListener('compositionend',()=>{composing=false;});
-  ta.addEventListener('input', ()=> autosize(ta));
-  ta.addEventListener('keydown', (e)=>{
-    if(e.key==='Enter' && !e.shiftKey && !e.isComposing && !composing){ e.preventDefault(); addFromTextarea(); }
-  });
-
-  // 편집 테이블 위임
-  itemTable.addEventListener('input', onEditorInput);
-  itemTable.addEventListener('click', onEditorClick);
-
-  // 모달 버튼(위임)
-  document.addEventListener('click', (e)=>{
-    if(e.target && e.target.id==='btnReveal'){ mA.style.display = (mA.textContent.trim()? 'block':'none'); }
-    if(e.target && e.target.id==='btnClose'){ modal.classList.remove('show'); modal.style.display='none'; }
-  });
-
-  // 첫 렌더
-  rebuildSegments(); drawWheel();
-}
-
-/* ===== 입력 추가 ===== */
-function autosize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,180)+'px'; }
-function splitLabelAnswer(v){
-  if(v.includes('//')){ const [q,a]=v.split('//'); return [q.trim(), (a||'').trim()]; }
-  if(v.includes('||')){ const [q,a]=v.split('||'); return [q.trim(), (a||'').trim()]; }
-  return [v.trim(), ""];
-}
-function addFromTextarea(){
-  if(composing) return;
-  let v=(ta.value||'').replace(/\r/g,'').trim();
-  if(!v) return;
-  const [label,answer]=splitLabelAnswer(v);
-  items.push({label, answer, weight:null});
-  ta.value=''; autosize(ta);
-  showEditor(); rebuildSegments();
-  SFX.play('click');
-}
-
-/* ===== 세그먼트 구성(비중) ===== */
-function rebuildSegments(){
-  if(items.length===0){ segments=[]; drawWheel(); return; }
-  const n=items.length, weights=new Array(n).fill(0), unspecified=[];
-  let sumSpecified=0;
-  for(let i=0;i<n;i++){
-    const w=Number(items[i].weight);
-    if(!isNaN(w) && w>0){ weights[i]=w; sumSpecified+=w; } else unspecified.push(i);
-  }
-  if(sumSpecified===0){ for(let i=0;i<n;i++) weights[i]=100/n; }
-  else{
-    const rem=Math.max(0,100-sumSpecified); const share=unspecified.length? rem/unspecified.length : 0;
-    for(const i of unspecified) weights[i]=share;
-  }
-  const sum=weights.reduce((a,b)=>a+b,0)||1; const fracs=weights.map(w=>w/sum);
-  segments=[]; let acc=0;
-  for(let i=0;i<n;i++){
-    const start=acc*TWO_PI, end=(acc+fracs[i])*TWO_PI;
-    segments.push({label:items[i].label,start,end,center:(start+end)/2,weight:weights[i],answer:items[i].answer}); acc+=fracs[i];
-  }
-  drawWheel();
-}
-
-/* ===== 대비 색 계산 ===== */
-function hslToRgb(h,s,l){
-  const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2;
-  let r=0,g=0,b=0;
-  if(0<=h && h<60){r=c;g=x;}
-  else if(60<=h && h<120){r=x;g=c;}
-  else if(120<=h && h<180){g=c;b=x;}
-  else if(180<=h && h<240){g=x;b=c;}
-  else if(240<=h && h<300){r=x;b=c;}
-  else{r=c;b=x;}
-  return [(r+m)*255,(g+m)*255,(b+m)*255];
-}
-function luminance(r,g,b){
-  const a=[r,g,b].map(v=>{v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);});
-  return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2];
-}
-function bestTextColorForHue(h){
-  const [r,g,b]=hslToRgb(h,.75,.52);
-  return luminance(r,g,b)>0.5? '#0b0f1c' : '#ffffff';
-}
-
-/* ===== 그리기 ===== */
-function roundedRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y,h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
-function drawWheel(){
-  const W=canvas.width,H=canvas.height;
-  const R=Math.min(W,H)/2-36, rimO=R+26,rimI=R+6, innerW=R+2;
-
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(angle);
-
-  // 외곽 림
-  ctx.save(); ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=18;
-  ctx.beginPath(); ctx.arc(0,0,rimO,0,TWO_PI); ctx.fillStyle='#0a0c12'; ctx.fill(); ctx.restore();
-  ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.arc(0,0,rimI,0,TWO_PI); ctx.fill();
-  ctx.globalCompositeOperation='source-over';
-  ctx.beginPath(); ctx.arc(0,0,innerW,0,TWO_PI); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=6; ctx.stroke();
-
-  // 볼트
-  for(let i=0;i<8;i++){ const a=i*(TWO_PI/8), r=(rimO+rimI)/2, x=Math.cos(a)*r, y=Math.sin(a)*r;
-    ctx.beginPath(); ctx.arc(x,y,8,0,TWO_PI); ctx.fillStyle='#e6e8ef'; ctx.fill();
-    ctx.beginPath(); ctx.arc(x,y,3.2,0,TWO_PI); ctx.fillStyle='#1b1e2a'; ctx.fill();
-  }
-
-  // 조각 & 라벨
-  if(segments.length){
-    for(let i=0;i<segments.length;i++){
-      const s=segments[i], hue=Math.floor((360/segments.length)*i);
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,s.start,s.end); ctx.closePath();
-      ctx.fillStyle=`hsl(${hue} 75% 52%)`; ctx.fill();
-      ctx.strokeStyle="rgba(5,10,30,.6)"; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,0,R,s.start,s.end); ctx.stroke();
-
-      ctx.save(); ctx.rotate(s.center);
-      const rr=R*0.72;
-      roundedRect(ctx, rr-92, -22, 184, 44, 12); ctx.fillStyle="rgba(4,7,22,.35)"; ctx.fill();
-      ctx.fillStyle=bestTextColorForHue(hue);
-      ctx.textAlign="center"; ctx.textBaseline="middle";
-      let fs=28; ctx.font="700 "+fs+"px ui-sans-serif,system-ui,'Noto Sans KR'";
-      while(ctx.measureText(s.label).width > 170 && fs>14){ fs-=1; ctx.font="700 "+fs+"px ui-sans-serif,system-ui,'Noto Sans KR'"; }
-      ctx.fillText(s.label, rr, 0);
-      ctx.restore();
-    }
-  }else{
-    ctx.beginPath(); ctx.arc(0,0,R,0,TWO_PI); ctx.fillStyle='#3b4a9e'; ctx.fill();
-  }
-
-  // 허브
-  ctx.beginPath(); ctx.arc(0,0,80,0,TWO_PI);
-  const g=ctx.createRadialGradient(0,0,10,0,0,80); g.addColorStop(0,'#7bd3ff'); g.addColorStop(1,'#0b76d1');
-  ctx.fillStyle=g; ctx.fill();
-  ctx.beginPath(); ctx.arc(0,0,90,0,TWO_PI); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=10; ctx.stroke();
-
-  ctx.restore();
-}
-
-/* ===== 회전 ===== */
-function getIndexAtPointer(){
-  const a=norm(POINTER_ANGLE - angle);
-  for(let i=0;i<segments.length;i++){
-    const s=segments[i];
-    if(s.start<=a && a<s.end) return i;
-    if(i===segments.length-1 && Math.abs(a-s.end)<1e-6) return i;
-  }
-  return -1;
-}
-function pickIndexWeighted(){
-  const total=segments.reduce((a,s)=>a+(s.end-s.start),0);
-  let r=Math.random()*total, acc=0;
-  for(let i=0;i<segments.length;i++){ const len=segments[i].end-segments[i].start; if(r<acc+len) return i; acc+=len; }
-  return segments.length-1;
-}
-function targetAngleForIndex(i){
-  const desired = POINTER_ANGLE - segments[i].center;
-  const delta = norm(desired - angle);
-  const turns = 6 + Math.floor(Math.random()*2);
-  return angle + turns*TWO_PI + delta;
-}
-function spin(){
-  if(spinning || segments.length===0) return;
-  spinning=true; qs('btnCenterStart').disabled=true; lastTick=-1;
-  SFX.play('start');
-
-  const idx=pickIndexWeighted(); const target=targetAngleForIndex(idx);
-  const start=angle, duration=3600+Math.random()*1400, t0=performance.now();
-
-  (function anim(now){
-    const t=Math.min((now-t0)/duration,1), ease=1-Math.pow(1-t,3);
-    angle=start+(target-start)*ease; drawWheel();
-
-    const cur = getIndexAtPointer();
-    if(cur!==-1 && cur!==lastTick){ lastTick=cur; SFX.play('tick'); }
-
-    if(t<1) requestAnimationFrame(anim);
-    else {
-      angle=target; drawWheel();
-      const finalIdx=(getIndexAtPointer()>=0)? getIndexAtPointer() : idx;
-      onWin(finalIdx);
-      spinning=false; qs('btnCenterStart').disabled=false;
-    }
-  })(t0);
-}
-function onWin(i){
-  const seg=segments[i];
-  historyLog.unshift({t:nowstr(), v:seg.label});
-  renderLog();
-
-  // 결과 팝업
-  mQ.textContent = seg.label || '';
-  const ans = (items.find(x=>x.label===seg.label)?.answer||'').trim();
-  mA.textContent = ans ? ('정답: '+ans) : '';
-  mA.style.display = 'none';
-  modal.style.display='flex'; modal.classList.add('show');
-  SFX.play('win');
-
-  if(!allowDuplicate){
-    const k=items.findIndex(o=>o.label===seg.label);
-    if(k>=0){ items.splice(k,1); renderEditor(); rebuildSegments(); if(!items.length) hide(editorWrap); }
-  }
-}
-
-/* ===== 편집 ===== */
-function renderEditor(){
-  itemTable.innerHTML = items.length ? items.map((o,i)=>`
-    <tr>
-      <td class="td-index">${i+1}.</td>
-      <td class="td-label"><input data-k="${i}" class="ipt-label" value="${esc(o.label)}" /></td>
-      <td class="td-answer"><input data-k="${i}" class="ipt-answer" value="${esc(o.answer||'')}" /></td>
-      <td class="td-weight"><input data-k="${i}" class="ipt-weight" type="number" min="0" step="0.1" placeholder="-" value="${o.weight??''}"/></td>
-      <td class="td-actions"><button class="icon-btn btn-del" title="삭제" data-k="${i}">🗑</button></td>
-    </tr>`).join('') : `<tr><td colspan="5" style="opacity:.7;padding:10px">항목이 없습니다.</td></tr>`;
-}
-function showEditor(){ renderEditor(); show(editorWrap); }
-function onEditorInput(e){
-  const t=e.target;
-  if(t.classList.contains('ipt-label')){ items[+t.dataset.k].label=t.value; drawWheel(); }
-  if(t.classList.contains('ipt-answer')){ items[+t.dataset.k].answer=t.value; }
-  if(t.classList.contains('ipt-weight')){ items[+t.dataset.k].weight=(t.value===''?null:Number(t.value)); rebuildSegments(); }
-}
-function onEditorClick(e){
-  const del = e.target.closest('.btn-del'); if(del){ const k=+del.dataset.k; items.splice(k,1); renderEditor(); rebuildSegments(); if(!items.length) hide(editorWrap); }
-}
-function syncEditor(){
-  document.querySelectorAll('.ipt-label').forEach(el=>{ const k=+el.dataset.k; if(items[k]) items[k].label = el.value; });
-  document.querySelectorAll('.ipt-answer').forEach(el=>{ const k=+el.dataset.k; if(items[k]) items[k].answer = el.value; });
-  document.querySelectorAll('.ipt-weight').forEach(el=>{ const k=+el.dataset.k; if(items[k]) items[k].weight = (el.value===''? null : Number(el.value)); });
-}
-
-/* ===== 기록 ===== */
-function renderLog(){
-  if(logBox.classList.contains('hidden')) return;
-  logBox.innerHTML = historyLog.map(r=>`<div>• <b>${esc(r.v)}</b> <span style="opacity:.75">(${r.t})</span></div>`).join('');
-}
-
-/* ===== 파일 입출력 ===== */
-function onFilePicked(e){
-  const f=e.target.files[0]; if(!f) return;
-  f.text().then(text=>{
-    const name=(f.name||'').toLowerCase();
-    let parsed=[]; if(name.endsWith('.csv')) parsed=parseCSV(text); else parsed=parseTXT(text);
-    if(!parsed.length){ alert('파일에서 항목을 찾지 못했습니다.'); return; }
-    items=parsed; showEditor(); rebuildSegments();
-  }).catch(()=> alert('파일 읽기 오류')).finally(()=>{ e.target.value=''; });
-}
-function parseTXT(s){
-  return s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean).map(line=>{
-    const [label,answer] = line.includes('//') ? line.split('//') :
-                           line.includes('||') ? line.split('||') : [line, ""];
-    return {label:label.trim(), answer:(answer||'').trim(), weight:null};
-  });
-}
-function parseCSV(s){
-  const lines=s.split(/\r?\n/).map(v=>v.trim()).filter(Boolean), out=[];
-  for(let i=0;i<lines.length;i++){
-    const line=lines[i]; if(i===0 && /label/i.test(line)) continue;
-    const [a,b,c]=(line.split(',')||[]).map(x=>x?.trim()); if(!a) continue;
-    const w=(c==null||c==='')? null : Number(c);
-    out.push({label:a, answer:b||'', weight=isNaN(w)? null : w});
-  } return out;
-}
-function downloadSamples(){
-  const txt='사과 // Apple\n바나나 // Banana\n체리 // Cherry\n포도 // Grape';
-  const csv='label,answer,weight\n사과,Apple,40\n바나나,Banana,\n체리,Cherry,30\n포도,Grape,';
-  download('sample.txt',txt,'text/plain;charset=utf-8');
-  download('sample.csv',csv,'text/csv;charset=utf-8');
-}
-function download(name,content,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
-
-/* ===== 대형 화면(팝업) ===== */
-function openBig(){
-  const theme=document.documentElement.getAttribute('data-theme')||'dark';
-  const payload = buildBigHtml({ theme, items, allowDuplicate, angle });
-  const w = window.open('', '_blank', 'width=1200,height=1000');
-  if(!w){ alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.'); return; }
-  w.document.open(); w.document.write(payload); w.document.close();
-}
-function buildBigHtml({theme, items, allowDuplicate, angle}){
-  return '<!DOCTYPE html><html lang="ko" data-theme="'+theme+'"><head><meta charset="UTF-8" />'
-    + '<meta name="viewport" content="width=device-width,initial-scale=1" /><title>대형 룰렛</title>'
-    + '<style>html,body{height:100%;margin:0;background:'+ (theme==='light'?'#f6f7fb':'#0a0d1f') +';color:'+ (theme==='light'?'#101322':'#fff') +';font-family:ui-sans-serif,system-ui,\\'Noto Sans KR\\',sans-serif}'
-    + '.stage{position:relative;display:grid;place-items:center;height:100%}'
-    + '.pointer{position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:30px solid #ff5a5a; filter:drop-shadow(0 10px 14px rgba(0,0,0,.45)); z-index:50;}'
-    + 'canvas{width:min(92vmin,1200px);height:min(92vmin,1200px);z-index:10}'
-    + '.center{position:absolute; inset:0; display:grid; place-items:center; z-index:40}'
-    + '.start{all:unset; width:190px; height:190px; border-radius:50%; display:grid; place-items:center; font-weight:900; font-size:26px; color:#fff; background: radial-gradient(circle at 35% 30%, #7bd3ff, #3aa7ff 60%, #0b76d1 100%); border:12px solid #fff; box-shadow:0 18px 28px rgba(0,0,0,.4); cursor:pointer; user-select:none;}'
-    + '.result{position:fixed;left:0;right:0;bottom:18px;display:grid;place-items:center;z-index:60}'
-    + '.result > div{padding:16px 22px;border-radius:16px;font-size:40px;font-weight:900;color:#fff;background:#0b1139e6;border:2px solid #3b4bd4a6;box-shadow:0 18px 32px rgba(0,0,0,.45)}'
-    + '</style></head><body>'
-    + '<div class="stage"><div class="pointer" aria-hidden="true"></div><canvas id="C" width="1400" height="1400"></canvas><div class="center"><button class="start" id="B">시작</button></div></div>'
-    + '<div class="result"><div id="R" style="display:none"></div></div>'
-    + '<script>var TWO_PI=Math.PI*2, POINTER_ANGLE=-Math.PI/2; var C=document.getElementById("C"), X=C.getContext("2d"); var items='+JSON.stringify(items)+'; var allow='+(allowDuplicate?'true':'false')+'; var angle='+(angle||0)+'; var spinning=false; var seg=[]; function rebuild(){ if(items.length===0){ seg=[]; draw(); return;} var n=items.length, w=new Array(n).fill(1), s=0, f=[]; for(var i=0;i<n;i++){ w[i]= (items[i].weight>0? items[i].weight : 1); s+=w[i]; } for(var j=0;j<n;j++) f[j]=w[j]/s; seg=[]; var a=0; for(var k=0;k<n;k++){ var st=a*TWO_PI, en=(a+f[k])*TWO_PI; seg.push({label:items[k].label,start:st,end:en,center:(st+en)/2}); a+=f[k]; } draw(); } function h2rgb(h,s,l){var c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2,r=0,g=0,b=0;if(0<=h&&h<60){r=c;g=x;}else if(60<=h&&h<120){r=x;g=c;}else if(120<=h&&h<180){g=c;b=x;}else if(180<=h&&h<240){g=x;b=c;}else if(240<=h&&h<300){r=x;b=c;}else{r=c;b=x;}return [(r+m)*255,(g+m)*255,(b+m)*255];} function lum(r,g,b){var a=[r,g,b].map(function(v){v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);}); return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]; } function txtColor(h){var rgb=h2rgb(h,.75,.52); return lum(rgb[0],rgb[1],rgb[2])>0.5? "#0b0f1c":"#ffffff"; } function draw(){ var W=C.width,H=C.height; X.clearRect(0,0,W,H); X.save(); X.translate(W/2,H/2); X.rotate(angle); var R=Math.min(W,H)/2-36, rimO=R+26, rimI=R+6, innerW=R+2; X.save(); X.shadowColor="rgba(0,0,0,.45)"; X.shadowBlur=18; X.beginPath(); X.arc(0,0,rimO,0,TWO_PI); X.fillStyle="#0a0c12"; X.fill(); X.restore(); X.globalCompositeOperation="destination-out"; X.beginPath(); X.arc(0,0,rimI,0,TWO_PI); X.fill(); X.globalCompositeOperation="source-over"; X.beginPath(); X.arc(0,0,innerW,0,TWO_PI); X.strokeStyle="rgba(255,255,255,.9)"; X.lineWidth=10; X.stroke(); if(seg.length){ for(var i=0;i<seg.length;i++){ var s=seg[i], hue=Math.floor((360/seg.length)*i); X.beginPath(); X.moveTo(0,0); X.arc(0,0,R,s.start,s.end); X.closePath(); X.fillStyle="hsl("+hue+" 75% 52%)"; X.fill(); X.strokeStyle="rgba(5,10,30,.6)"; X.lineWidth=6; X.beginPath(); X.arc(0,0,R,s.start,s.end); X.stroke(); X.save(); X.rotate(s.center); var rr=R*0.72; X.fillStyle=txtColor(hue); X.textAlign="center"; X.textBaseline="middle"; var fs=42; X.font="700 "+fs+"px ui-sans-serif,\\'Noto Sans KR\\'"; while(X.measureText(s.label).width>260 && fs>18){ fs--; X.font="700 "+fs+"px ui-sans-serif,\\'Noto Sans KR\\'"; } X.fillText(s.label, rr, 0); X.restore(); } } X.beginPath(); X.arc(0,0,95,0,TWO_PI); var g=X.createRadialGradient(0,0,10,0,0,95); g.addColorStop(0,"#7bd3ff"); g.addColorStop(1,"#0b76d1"); X.fillStyle=g; X.fill(); X.beginPath(); X.arc(0,0,105,0,TWO_PI); X.strokeStyle="rgba(255,255,255,.9)"; X.lineWidth=12; X.stroke(); X.restore(); } function norm(a){return (a%TWO_PI+TWO_PI)%TWO_PI;} function idxAt(){ var a=norm('+POINTER_ANGLE+' - angle); for(var i=0;i<seg.length;i++){ var s=seg[i]; if(s.start<=a && a<s.end) return i; if(i===seg.length-1 && Math.abs(a-s.end)<1e-6) return i; } return -1; } function pick(){ var tot=seg.reduce(function(a,s){return a+(s.end-s.start);},0), r=Math.random()*tot, acc=0; for(var i=0;i<seg.length;i++){ var len=seg[i].end-seg[i].start; if(r<acc+len) return i; acc+=len;} return seg.length-1; } function target(i){ var desired='+POINTER_ANGLE+' - seg[i].center; var delta=norm(desired - angle); var turns=6+Math.floor(Math.random()*2); return angle + turns*TWO_PI + delta; } function spin(){ if(spinning||seg.length===0) return; spinning=true; var i=pick(), tgt=target(i), st=angle, dur=3600+Math.random()*1400, t0=performance.now(); (function anim(now){ var t=Math.min((now-t0)/dur,1), ease=1-Math.pow(1-t,3); angle=st+(tgt-st)*ease; draw(); if(t<1) requestAnimationFrame(anim); else { angle=tgt; draw(); var idx=(idxAt()>=0)?idxAt():i; var R=document.getElementById("R"); R.style.display="inline-block"; R.textContent="🎉 "+seg[idx].label; if(!allow){ var k=items.findIndex(function(o){return o.label===seg[idx].label;}); if(k>=0) items.splice(k,1); rebuild(); } spinning=false; } })(performance.now()); } document.getElementById("B").onclick=spin; rebuild(); draw();<\/script></body></html>';
-}
-
-})();</script>
+  <!-- 분리된 스크립트 -->
+  <script src="roullet.js" defer></script>
 </body>
 </html>
